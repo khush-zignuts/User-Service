@@ -70,7 +70,6 @@ module.exports = {
         name,
         otp: otp,
         otpCreatedAt: otpCreated,
-        role: "user",
         phoneNumber: phoneNumber,
         createdAt: otpCreated,
         createdBy: uuid,

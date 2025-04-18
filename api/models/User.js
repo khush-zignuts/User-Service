@@ -1,6 +1,6 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../config/db");
-const CommonFields = require("./CommanFields");
+const sequelize = require("../../config/db");
+const { CommonFields, commonOptions } = require("./CommanFields");
 
 const User = sequelize.define(
   "User",
@@ -20,7 +20,6 @@ const User = sequelize.define(
     email: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
     },
 
     password: {
@@ -31,10 +30,6 @@ const User = sequelize.define(
       type: DataTypes.STRING(15),
       allowNull: true,
       field: "phone_number",
-    },
-    role: {
-      type: DataTypes.ENUM("user", "admin"),
-      defaultValue: "user",
     },
     accessToken: {
       type: DataTypes.TEXT,
@@ -55,7 +50,7 @@ const User = sequelize.define(
   {
     tableName: "user",
     freezeTableName: true,
-    timestamps: false,
+    ...commonOptions,
   }
 );
 
