@@ -1,7 +1,7 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const { User } = require("../models/index");
-const { HTTP_STATUS_CODES } = require("../config/constant");
+const { HTTP_STATUS_CODES } = require("../../config/db");
 
 const checkUser = async (req, res, next) => {
   try {

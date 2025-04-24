@@ -1,6 +1,6 @@
 const { DataTypes } = require("sequelize");
 
-const CommonField = {
+const CommonFields = {
   createdAt: {
     type: DataTypes.BIGINT,
     field: "created_at",
@@ -59,4 +59,4 @@ const commonOptions = {
   },
 };
 
-module.exports = { CommonField, commonOptions };
+module.exports = { CommonFields, commonOptions };

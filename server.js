@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
-const sequelize = require("./api/config/db");
+const cors = require("cors"); // <-- Import cors
+const sequelize = require("./config/db");
 
 const userRoutes = require("./api/routes/index");
 
@@ -9,6 +10,13 @@ const app = express();
 //middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+app.use(
+  cors({
+    origin: "http://localhost:5173", // replace with your frontend URL
+    credentials: true,
+  })
+);
 
 //Routes
 app.use("/api/user", userRoutes);

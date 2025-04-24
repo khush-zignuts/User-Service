@@ -1,0 +1,273 @@
+const { HTTP_STATUS_CODES } = require("../../../config/constant");
+const { Sequelize } = require("sequelize");
+const sequelize = require("../../../config/db");
+
+// Get all events or search by title/category
+
+module.exports = {
+  getAllEventsBySearch: async (req, res) => {
+    try {
+      const title = req.query.title || null;
+      const category = req.query.category || null;
+
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const offset = (page - 1) * limit;
+      const replacements = { limit, offset };
+
+      let whereClause = `WHERE e.is_deleted = false`;
+
+      if (title) {
+        whereClause += ` AND e.title ILIKE :title`;
+        replacements.title = `%${title}%`;
+      }
+
+      if (category) {
+        whereClause += ` AND e.category ILIKE :category`;
+        replacements.category = `%${category}%`;
+      }
+
+      let paginationClause = `LIMIT :limit OFFSET :offset`;
+
+      const rawQuery = `
+        SELECT
+          e.id,
+          e.title,
+          e.description,
+          e.location,
+          e.date,
+          e.time,
+          e."available_seats" AS capacity,
+          e.category
+        FROM event AS e
+        ${whereClause}
+        ORDER BY e.date ASC
+        ${paginationClause};
+      `;
+
+      const events = await sequelize.query(rawQuery, {
+        replacements,
+        type: Sequelize.QueryTypes.SELECT,
+      });
+
+      const countQuery = `
+        SELECT COUNT(e.id) AS total
+        FROM event e
+        ${whereClause}
+        ${paginationClause};
+      `;
+      const countResult = await sequelize.query(countQuery, {
+        replacements,
+        type: Sequelize.QueryTypes.SELECT,
+      });
+
+      const totalRecords = parseInt(countResult[0].total);
+      const totalPages = Math.ceil(totalRecords / limit);
+
+      if (!events || events.length === 0) {
+        return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({
+          status: HTTP_STATUS_CODES.NOT_FOUND,
+          message: "No events found matching your search.",
+          data: [],
+          error: "",
+        });
+      }
+
+      return res.status(HTTP_STATUS_CODES.OK).json({
+        status: HTTP_STATUS_CODES.OK,
+        message: "Events fetched successfully.",
+        data: {
+          events,
+          totalRecords,
+        },
+        error: "",
+      });
+    } catch (error) {
+      console.error("Error fetching events:", error.message);
+      return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+        status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
+        message: "Failed to fetch events.",
+        data: [],
+        error: error.message || "INTERNAL_SERVER_ERROR",
+      });
+    }
+  },
+  getAllNotifications: async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { type } = req.query;
+
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const offset = (page - 1) * limit;
+
+      const replacements = { userId, limit, offset };
+      let whereClause = `WHERE n.user_id = :userId`;
+
+      if (type && ["event", "announcement", "reminder"].includes(type)) {
+        whereClause += ` AND n.type = :type`;
+        replacements.type = type;
+      }
+
+      const rawQuery = `
+        SELECT
+          n.id,
+          n.user_id AS "userId",
+          n.title,
+          n.message,
+          n.type
+        FROM notification n
+        ${whereClause}
+        ORDER BY n."createdAt" DESC
+        LIMIT :limit OFFSET :offset;
+      `;
+
+      const notifications = await sequelize.query(rawQuery, {
+        replacements,
+        type: Sequelize.QueryTypes.SELECT,
+      });
+
+      const countQuery = `
+        SELECT COUNT(n.id) AS total
+        FROM notification n
+        ${whereClause};
+      `;
+
+      const countResult = await sequelize.query(countQuery, {
+        replacements,
+        type: Sequelize.QueryTypes.SELECT,
+      });
+
+      const totalRecords = parseInt(countResult[0].total);
+      const totalPages = Math.ceil(totalRecords / limit);
+
+      return res.status(HTTP_STATUS_CODES.OK).json({
+        status: HTTP_STATUS_CODES.OK,
+        message: "Notifications fetched successfully.",
+        data: {
+          notifications,
+          totalRecords,
+        },
+        error: "",
+      });
+    } catch (error) {
+      console.error("Error fetching notifications:", error.message);
+      return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+        status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
+        message: "Failed to fetch notifications.",
+        data: [],
+        error: error.message || "INTERNAL_SERVER_ERROR",
+      });
+    }
+  },
+  submitEventFeedback: async (req, res) => {
+    try {
+      const { eventId, rating, comment } = req.body;
+      const userId = req.user.id; // assuming auth middleware sets this
+
+      if (!eventId || !rating) {
+        return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+          success: false,
+          statusCode: HTTP_STATUS_CODES.BAD_REQUEST,
+          message: "Event ID and rating are required.",
+          data: "",
+          error: "",
+        });
+      }
+
+      // 1. Check if event exists
+      const event = await Event.findOne({
+        where: { id: eventId, isDeleted: false },
+        attributes: ["id"],
+      });
+
+      if (!event) {
+        return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({
+          success: false,
+          statusCode: HTTP_STATUS_CODES.NOT_FOUND,
+          message: "Event not found.",
+          data: "",
+          error: "",
+        });
+      }
+
+      const eventDate = new Date(event.date); // event.date is already a Date object
+      const [hours, minutes] = event.time.split(":").map(Number);
+
+      // Combine date and time
+      eventDate.setHours(hours);
+      eventDate.setMinutes(minutes);
+      eventDate.setSeconds(0);
+      eventDate.setMilliseconds(0);
+
+      const now = new Date();
+
+      if (now < eventDate) {
+        return res.status(HTTP_STATUS_CODES.FORBIDDEN).json({
+          success: false,
+          statusCode: HTTP_STATUS_CODES.FORBIDDEN,
+          message: "You can only give feedback after the event has ended.",
+          data: null,
+          error: "EVENT_NOT_COMPLETED",
+        });
+      }
+
+      // 3. Check if user has booked this event
+      const booking = await Booking.findOne({
+        where: { userId, eventId, status: "booked" },
+        attributes: ["id"],
+      });
+
+      if (!booking) {
+        return res.status(HTTP_STATUS_CODES.FORBIDDEN).json({
+          success: false,
+          statusCode: HTTP_STATUS_CODES.FORBIDDEN,
+          message: "You must book the event to submit feedback.",
+          data: "",
+          error: "",
+        });
+      }
+
+      // 4. Check if feedback already exists
+      const existingFeedback = await EventFeedback.findOne({
+        where: { userId, eventId },
+        attributes: ["id"],
+      });
+
+      if (existingFeedback) {
+        return res.status(HTTP_STATUS_CODES.CONFLICT).json({
+          success: false,
+          statusCode: HTTP_STATUS_CODES.CONFLICT,
+          message: "Feedback already submitted for this event.",
+          data: "",
+          error: "",
+        });
+      }
+
+      // 5. Create feedback
+      const feedback = await EventFeedback.create({
+        eventId,
+        userId,
+        rating,
+        comment,
+      });
+
+      return res.status(HTTP_STATUS_CODES.CREATED).json({
+        success: true,
+        statusCode: HTTP_STATUS_CODES.CREATED,
+        message: "Feedback submitted successfully.",
+        data: feedback,
+        error: "",
+      });
+    } catch (error) {
+      console.error("Feedback Submit Error:", error);
+      return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        statusCode: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
+        message: "Failed to submit feedback.",
+        data: null,
+        error: error.message || "INTERNAL_SERVER_ERROR",
+      });
+    }
+  },
+};

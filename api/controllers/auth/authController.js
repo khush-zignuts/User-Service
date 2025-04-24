@@ -1,19 +1,16 @@
 const otpGenerator = require("otp-generator");
 const VALIDATOR = require("validatorjs");
+const generateUUID = require("../../utils/generateUUID");
+const hashPw = require("../../utils/hashpw");
+const comparePassword = require("../../utils/comparePassword");
 
 const jwt = require("jsonwebtoken");
-
-const { HTTP_STATUS_CODES, TOKEN_EXPIRY } = require("../../config/constant");
+const verifyOTP = require("../../utils/verifyOtp");
+const { HTTP_STATUS_CODES, TOKEN_EXPIRY } = require("../../../config/constant");
 const { VALIDATION_RULES } = require("../../../config/validationRules");
-const {
-  hashPw,
-  verifyOTP,
-  comparePassword,
-  generateUUID,
-} = require("../../helper/helper");
 
 const { User } = require("../../models/index");
-const sendEmail = require("../../utils/sendEmail");
+const sendEmail = require("../../helper/sendEmail");
 
 module.exports = {
   signup: async (req, res) => {
@@ -39,8 +36,7 @@ module.exports = {
 
       // Check if user exists
       const existingUser = await User.findOne({
-        where: { email, isDeleted: false },
-
+        where: { email, isDeleted: false, isActive: true },
         attributes: ["id"],
       });
 
@@ -79,9 +75,20 @@ module.exports = {
 
       otpStore[email] = otp;
 
-      const html = `<h2>Your OTP is: ${otp}</h2><p>It is valid for 5 minutes.</p>`;
+      const templateData = {
+        userName: name,
+        otp: otp,
+        appName: "Event Management",
+        year: new Date().getFullYear(),
+      };
 
-      await sendEmail(email, "Your OTP for Signup", html);
+      console.log("templateData: ", templateData);
+      await sendEmail(
+        email,
+        "Verify Your Email - OTP",
+        "../../assets/templates/otp-verification-email.handlebars",
+        templateData
+      );
 
       return res.status(HTTP_STATUS_CODES.OK).json({
         status: HTTP_STATUS_CODES.OK,
@@ -117,8 +124,8 @@ module.exports = {
       }
 
       const user = await User.findOne({
-        where: { email },
-        isDeleted: false,
+        where: { email, isDeleted: false, isActive: true },
+
         attributes: ["id", "otp", "otpCreatedAt"],
       });
 
@@ -177,7 +184,7 @@ module.exports = {
       }
 
       const user = await User.findOne({
-        where: { email },
+        where: { email, isDeleted: false, isActive: true },
         attributes: ["id", "email", "password", "accessToken"],
       });
 
@@ -226,7 +233,7 @@ module.exports = {
 
   logout: async (req, res) => {
     try {
-      const { userId } = req.params;
+      const userId = req.user.id;
 
       const user = await User.findOne({
         where: { id: userId, isDeleted: false },

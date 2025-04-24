@@ -4,9 +4,11 @@ const checkUser = require("../../middleware/checkUser");
 const router = express.Router();
 
 //auth User
-router.post("/signup", authController.signup);
-router.post("/verifyotp", authController.verifyOTP);
-router.post("/login", authController.login);
-router.post("/logout/:userId", checkUser, authController.logout);
+console.log("in auth controller log ");
+router
+  .post("/signup", authController.signup)
+  .post("/verifyotp", authController.verifyOTP)
+  .post("/login", authController.login)
+  .post("/logout", checkUser, authController.logout);
 
 module.exports = router;

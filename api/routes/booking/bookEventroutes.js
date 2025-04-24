@@ -1,0 +1,10 @@
+const express = require("express");
+const { bookEventController } = require("../../controllers/index");
+
+const checkUser = require("../../middleware/checkUser");
+const router = express.Router();
+
+//booking create
+router.post("/event", checkUser, bookEventController.bookEvent);
+
+module.exports = router;

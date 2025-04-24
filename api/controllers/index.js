@@ -1,7 +1,11 @@
 const express = require("express");
 
-const authController = require("./auth/authController");
+const authController = require("./auth/AuthController");
+const eventController = require("./event/EventController");
+const bookEventController = require("./booking/BookEventController");
 
 module.exports = {
   authController,
+  eventController,
+  bookEventController,
 };
