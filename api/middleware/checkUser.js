@@ -8,9 +8,9 @@ const checkUser = async (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.json({
+      return res.status(HTTP_STATUS_CODES.UNAUTHORIZED).json({
         status: HTTP_STATUS_CODES.UNAUTHORIZED,
-        message: i18n.__("api.errors.unauthorized"),
+        message: "unauthorized",
         data: "",
         error: "",
       });
@@ -18,9 +18,9 @@ const checkUser = async (req, res, next) => {
     const token = authHeader.split(" ")[1];
 
     if (!token) {
-      return res.json({
+      return res.status(HTTP_STATUS_CODES.UNAUTHORIZED).json({
         status: HTTP_STATUS_CODES.UNAUTHORIZED,
-        message: i18n.__("Access denied. No token provided."),
+        message: "Access denied. No token provided.",
         data: "",
         error: "",
       });
@@ -34,9 +34,9 @@ const checkUser = async (req, res, next) => {
     });
 
     if (!user) {
-      return res.json({
+      return res.status(HTTP_STATUS_CODES.UNAUTHORIZED).json({
         status: HTTP_STATUS_CODES.UNAUTHORIZED,
-        message: i18n.__("api.errors.unauthorized"),
+        message: "unauthorized",
         data: "",
         error: "",
       });
@@ -45,9 +45,7 @@ const checkUser = async (req, res, next) => {
     if (user.accessToken !== token) {
       return res.json({
         status: HTTP_STATUS_CODES.UNAUTHORIZED,
-        message: i18n.__(
-          "api.errors.unauthorized" || "Invalid or expired token."
-        ),
+        message: "Invalid or expired token.",
         data: "",
         error: "",
       });
@@ -57,10 +55,10 @@ const checkUser = async (req, res, next) => {
 
     next();
   } catch (error) {
-    return res.json({
+    return res.status(HTTP_STATUS_CODES.UNAUTHORIZED).json({
       status: HTTP_STATUS_CODES.UNAUTHORIZED,
-      message: i18n.__("api.errors.unauthorized"),
-      data: null,
+      message: "unauthorized",
+      data: "",
       error: error.message,
     });
   }

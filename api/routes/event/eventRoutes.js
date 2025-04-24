@@ -11,4 +11,3 @@ router
   .post("/submiteventfeedback", checkUser, eventController.submitEventFeedback);
 
 module.exports = router;
-submitEventFeedback;

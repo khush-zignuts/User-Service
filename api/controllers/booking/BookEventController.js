@@ -12,16 +12,16 @@ module.exports = {
 
       // Fetch event to get organiserId
       const event = await Event.findOne({
-        where: { id: eventId },
-        attributes: ["id"],
+        where: { id: eventId, isDeleted: false },
+        attributes: ["id", "organiserId"],
       });
+      console.log("event: ", event);
 
       if (!event) {
         return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({
-          success: false,
-          statusCode: HTTP_STATUS_CODES.NOT_FOUND,
+          status: HTTP_STATUS_CODES.NOT_FOUND,
           message: "Event not found.",
-          data: null,
+          data: "",
           error: "EVENT_NOT_FOUND",
         });
       }
@@ -38,16 +38,14 @@ module.exports = {
       if (existingBooking) {
         if (existingBooking.status === "booked") {
           return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
-            success: false,
-            statusCode: HTTP_STATUS_CODES.BAD_REQUEST,
+            status: HTTP_STATUS_CODES.BAD_REQUEST,
             message: "You have already booked this event.",
             data: "",
             error: "DUPLICATE_BOOKING",
           });
         } else if (existingBooking.status === "cancelled") {
           return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
-            success: false,
-            statusCode: HTTP_STATUS_CODES.BAD_REQUEST,
+            status: HTTP_STATUS_CODES.BAD_REQUEST,
             message:
               "The event booking was previously cancelled by the organiser.",
             data: "",
@@ -55,8 +53,7 @@ module.exports = {
           });
         } else if (existingBooking.status === "pending") {
           return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
-            success: false,
-            statusCode: HTTP_STATUS_CODES.BAD_REQUEST,
+            status: HTTP_STATUS_CODES.BAD_REQUEST,
             message: "Your booking for this event is still pending.",
             data: "",
             error: "BOOKING_PENDING",
@@ -77,20 +74,18 @@ module.exports = {
       await Booking.create(newBooking);
 
       return res.status(HTTP_STATUS_CODES.CREATED).json({
-        success: true,
-        statusCode: HTTP_STATUS_CODES.CREATED,
+        status: HTTP_STATUS_CODES.CREATED,
         message: "Event booked successfully. Awaiting confirmation.",
         data: newBooking,
         error: "",
       });
     } catch (error) {
       console.error("Book Event Error:", error.message);
-      return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        statusCode: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
+      return res.status(HTTP_STATUS_CODES.SERVER_ERROR).json({
+        status: HTTP_STATUS_CODES.SERVER_ERROR,
         message: "Failed to book event.",
         data: "",
-        error: error.message || "INTERNAL_SERVER_ERROR",
+        error: error.message || "SERVER_ERROR",
       });
     }
   },

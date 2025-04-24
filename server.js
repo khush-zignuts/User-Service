@@ -27,7 +27,7 @@ const PORT = process.env.PORT;
 app.listen(PORT, async () => {
   // Sync Database and Start Server
   try {
-    // await sequelize.sync({ alter: true }); // or { force: true } to drop & recreate tables (CAUTION)
+    await sequelize.sync({ alter: true }); // or { force: true } to drop & recreate tables (CAUTION)
     console.log(`Server is running on port ${PORT}`);
   } catch (error) {
     console.log(error.message);

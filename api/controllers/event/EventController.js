@@ -1,6 +1,8 @@
 const { HTTP_STATUS_CODES } = require("../../../config/constant");
 const { Sequelize } = require("sequelize");
+const VALIDATOR = require("validatorjs");
 const sequelize = require("../../../config/db");
+const { Booking, Event, EventFeedback } = require("../../models/index");
 
 // Get all events or search by title/category
 
@@ -84,11 +86,11 @@ module.exports = {
       });
     } catch (error) {
       console.error("Error fetching events:", error.message);
-      return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-        status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
+      return res.status(HTTP_STATUS_CODES.SERVER_ERROR).json({
+        status: HTTP_STATUS_CODES.SERVER_ERROR,
         message: "Failed to fetch events.",
         data: [],
-        error: error.message || "INTERNAL_SERVER_ERROR",
+        error: error.message || "SERVER_ERROR",
       });
     }
   },
@@ -152,46 +154,49 @@ module.exports = {
       });
     } catch (error) {
       console.error("Error fetching notifications:", error.message);
-      return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-        status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
+      return res.status(HTTP_STATUS_CODES.SERVER_ERROR).json({
+        status: HTTP_STATUS_CODES.SERVER_ERROR,
         message: "Failed to fetch notifications.",
         data: [],
-        error: error.message || "INTERNAL_SERVER_ERROR",
+        error: error.message || "SERVER_ERROR",
       });
     }
   },
   submitEventFeedback: async (req, res) => {
     try {
       const { eventId, rating, comment } = req.body;
-      const userId = req.user.id; // assuming auth middleware sets this
+      const userId = req.user.id;
 
-      if (!eventId || !rating) {
+      const validation = new VALIDATOR(req.body, {
+        eventId: VALIDATION_RULES.EVENT_FEEDBACK.EVENT_ID,
+        rating: VALIDATION_RULES.EVENT_FEEDBACK.RATING,
+        comment: VALIDATION_RULES.EVENT_FEEDBACK.COMMENT,
+      });
+
+      if (validation.fails()) {
         return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
-          success: false,
-          statusCode: HTTP_STATUS_CODES.BAD_REQUEST,
-          message: "Event ID and rating are required.",
+          status: HTTP_STATUS_CODES.BAD_REQUEST,
+          message: "Validation failed.",
           data: "",
-          error: "",
+          error: validation.errors.all(),
         });
       }
 
-      // 1. Check if event exists
       const event = await Event.findOne({
         where: { id: eventId, isDeleted: false },
-        attributes: ["id"],
+        attributes: ["id", "date"],
       });
 
       if (!event) {
         return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({
-          success: false,
-          statusCode: HTTP_STATUS_CODES.NOT_FOUND,
+          success: HTTP_STATUS_CODES.NOT_FOUND,
           message: "Event not found.",
           data: "",
           error: "",
         });
       }
 
-      const eventDate = new Date(event.date); // event.date is already a Date object
+      const eventDate = new Date(event.date);
       const [hours, minutes] = event.time.split(":").map(Number);
 
       // Combine date and time
@@ -204,15 +209,13 @@ module.exports = {
 
       if (now < eventDate) {
         return res.status(HTTP_STATUS_CODES.FORBIDDEN).json({
-          success: false,
-          statusCode: HTTP_STATUS_CODES.FORBIDDEN,
+          success: HTTP_STATUS_CODES.FORBIDDEN,
           message: "You can only give feedback after the event has ended.",
-          data: null,
-          error: "EVENT_NOT_COMPLETED",
+          data: "",
+          error: "",
         });
       }
 
-      // 3. Check if user has booked this event
       const booking = await Booking.findOne({
         where: { userId, eventId, status: "booked" },
         attributes: ["id"],
@@ -220,8 +223,7 @@ module.exports = {
 
       if (!booking) {
         return res.status(HTTP_STATUS_CODES.FORBIDDEN).json({
-          success: false,
-          statusCode: HTTP_STATUS_CODES.FORBIDDEN,
+          success: HTTP_STATUS_CODES.FORBIDDEN,
           message: "You must book the event to submit feedback.",
           data: "",
           error: "",
@@ -236,8 +238,7 @@ module.exports = {
 
       if (existingFeedback) {
         return res.status(HTTP_STATUS_CODES.CONFLICT).json({
-          success: false,
-          statusCode: HTTP_STATUS_CODES.CONFLICT,
+          success: HTTP_STATUS_CODES.CONFLICT,
           message: "Feedback already submitted for this event.",
           data: "",
           error: "",
@@ -253,20 +254,18 @@ module.exports = {
       });
 
       return res.status(HTTP_STATUS_CODES.CREATED).json({
-        success: true,
-        statusCode: HTTP_STATUS_CODES.CREATED,
+        success: HTTP_STATUS_CODES.CREATED,
         message: "Feedback submitted successfully.",
         data: feedback,
         error: "",
       });
     } catch (error) {
       console.error("Feedback Submit Error:", error);
-      return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        statusCode: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
+      return res.status(HTTP_STATUS_CODES.SERVER_ERROR).json({
+        success: HTTP_STATUS_CODES.SERVER_ERROR,
         message: "Failed to submit feedback.",
-        data: null,
-        error: error.message || "INTERNAL_SERVER_ERROR",
+        data: "",
+        error: error.message || "SERVER_ERROR",
       });
     }
   },
