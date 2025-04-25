@@ -27,21 +27,21 @@ module.exports = {
       ACCESS_TOKEN: "string",
       OTP: "string|min:4|max:6",
     },
-
     EVENT: {
       TITLE: "required|string|min:3|max:100",
       DESCRIPTION: "required|string|min:10",
       LOCATION: "required|string|min:2|max:100",
       DATE: "required|date",
-      TIME: "required|string|min:3|max:20",
       CAPACITY: "required|integer|min:1|max:10000",
-      ORGANISER_ID: "required|string|uuid",
+      ORGANIZER_ID: "required|string|uuid",
       CATEGORY: "required|string|min:3|max:50",
+      START_TIME: "required|time|validFormat", // Custom validation for HH:MM:SS
+      END_TIME: "required|time|validFormat|afterStartTime", // Custom validation to ensure endTime is after startTime
     },
 
     BOOKING: {
       USER_ID: "required|string|uuid",
-      ORGANISER_ID: "required|string|uuid",
+      ORGANIZER_ID: "required|string|uuid",
       EVENT_ID: "required|string|uuid",
       STATUS: "string|in:pending,booked,cancelled",
     },

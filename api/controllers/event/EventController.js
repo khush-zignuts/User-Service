@@ -38,7 +38,8 @@ module.exports = {
           e.description,
           e.location,
           e.date,
-          e.time,
+          e.start_time,
+          e.end_time,
           e."available_seats" AS capacity,
           e.category
         FROM event AS e
@@ -120,7 +121,7 @@ module.exports = {
           n.type
         FROM notification n
         ${whereClause}
-        ORDER BY n."createdAt" DESC
+        ORDER BY n.created_at DESC
         LIMIT :limit OFFSET :offset;
       `;
 

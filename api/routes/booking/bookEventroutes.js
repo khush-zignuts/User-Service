@@ -5,6 +5,12 @@ const checkUser = require("../../middleware/checkUser");
 const router = express.Router();
 
 //booking create
-router.post("/event", checkUser, bookEventController.bookEvent);
+router
+  .post("/event", checkUser, bookEventController.bookEvent)
+  .get(
+    "/getAllBookedEventsOrById",
+    checkUser,
+    bookEventController.getAllBookedEventsOrById
+  );
 
 module.exports = router;

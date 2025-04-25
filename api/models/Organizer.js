@@ -42,7 +42,6 @@ const Organizer = sequelize.define(
       allowNull: true,
       field: "otp_created_at",
     },
-
     ...CommonFields,
   },
   {

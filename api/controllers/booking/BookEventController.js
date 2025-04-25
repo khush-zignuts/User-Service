@@ -1,5 +1,7 @@
 const generateUUID = require("../../utils/generateUUID");
-
+const sequelize = require("../../../config/db");
+const { Sequelize } = require("sequelize");
+const { Op } = require("sequelize");
 const { HTTP_STATUS_CODES } = require("../../../config/constant");
 const { Booking, Event } = require("../../models/index");
 
@@ -10,10 +12,10 @@ module.exports = {
       const eventId = req.query.eventId;
       console.log("eventId: ", eventId);
 
-      // Fetch event to get organiserId
+      // Fetch event to get organizerId
       const event = await Event.findOne({
         where: { id: eventId, isDeleted: false },
-        attributes: ["id", "organiserId"],
+        attributes: ["id", "organizerId"],
       });
       console.log("event: ", event);
 
@@ -35,6 +37,8 @@ module.exports = {
         attributes: ["id"],
       });
 
+      console.log("existingBooking: ", existingBooking);
+
       if (existingBooking) {
         if (existingBooking.status === "booked") {
           return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
@@ -47,7 +51,7 @@ module.exports = {
           return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
             status: HTTP_STATUS_CODES.BAD_REQUEST,
             message:
-              "The event booking was previously cancelled by the organiser.",
+              "The event booking was previously cancelled by the organizer.",
             data: "",
             error: "BOOKING_CANCELLED",
           });
@@ -61,15 +65,17 @@ module.exports = {
         }
       }
       const bokkindId = generateUUID();
+      console.log("bokkindId: ", bokkindId);
 
       let newBooking = {
         id: bokkindId,
         userId: userId,
         eventId: eventId,
-        organiserId: event.organiserId,
+        organizerId: event.organizerId,
         status: "pending",
       };
 
+      console.log("newBooking: ", newBooking);
       // Create booking
       await Booking.create(newBooking);
 
@@ -86,6 +92,100 @@ module.exports = {
         message: "Failed to book event.",
         data: "",
         error: error.message || "SERVER_ERROR",
+      });
+    }
+  },
+  getAllBookedEventsOrById: async (req, res) => {
+    try {
+      const eventId = req.query.eventId;
+      const userId = req.user.id;
+      console.log("userId: ", userId);
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const offset = (page - 1) * limit;
+      let replacements = {};
+
+      let paginationClause = ` LIMIT :limit OFFSET :offset`;
+      replacements = { limit, offset };
+
+      let whereClause = `WHERE e.is_deleted = false AND b.status = 'booked' AND b.user_id = :userId `;
+      replacements.userId = userId;
+
+      if (eventId) {
+        whereClause += ` AND e.id = :eventId `;
+        replacements.eventId = eventId;
+      }
+
+      console.log("before raw query");
+
+      const rawQuery = `
+        SELECT DISTINCT 
+          e.id, 
+          e.title, 
+          e.description, 
+          e.location, 
+          e.date, 
+          e.start_time,
+          e.end_time,
+          e.available_seats AS capacity, 
+          e.category
+        FROM event AS e
+        INNER JOIN booking AS b ON b.event_id = e.id
+        ${whereClause}
+        ORDER BY e.date ASC
+        ${paginationClause};
+`;
+
+      console.log("after raw query");
+      const events = await sequelize.query(rawQuery, {
+        replacements,
+        type: Sequelize.QueryTypes.SELECT,
+      });
+      if (!events || events.length === 0) {
+        return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({
+          status: HTTP_STATUS_CODES.NOT_FOUND,
+          message: eventId
+            ? "No bookings found for the provided event ID."
+            : "No booked events found.",
+          data: "",
+          error: "",
+        });
+      }
+
+      const countQuery = `
+      SELECT COUNT(e.id) AS total
+      FROM event e
+      INNER JOIN booking AS b ON b.event_id = e.id
+      ${whereClause}
+      ${paginationClause};
+    `;
+
+      const countResult = await sequelize.query(countQuery, {
+        replacements,
+        type: Sequelize.QueryTypes.SELECT,
+      });
+
+      const totalRecords = parseInt(countResult[0].total);
+      const totalPages = Math.ceil(totalRecords / limit);
+
+      return res.status(HTTP_STATUS_CODES.OK).json({
+        status: HTTP_STATUS_CODES.OK,
+        message: eventId
+          ? "Booked event fetched successfully."
+          : "All booked events fetched successfully.",
+        data: {
+          events,
+          totalRecords,
+        },
+        error: "",
+      });
+    } catch (error) {
+      console.error("Error fetching booked events:", error);
+      return res.status(HTTP_STATUS_CODES.SERVER_ERROR).json({
+        status: HTTP_STATUS_CODES.SERVER_ERROR,
+        message: "Failed to fetch booked events.",
+        data: "",
+        error: error || "SERVER_ERROR",
       });
     }
   },
