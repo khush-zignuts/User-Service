@@ -16,6 +16,6 @@ router.use("/event", eventRoutes);
 router.use("/book", bookEventRoutes);
 
 //chat Routes
-router.use("/chat", chatRoutes);
+// router.use("/chat", chatRoutes);
 
 module.exports = router;
