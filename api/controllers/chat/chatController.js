@@ -8,7 +8,7 @@ const getorcreate = async (req, res) => {
   console.log("req.body: ", req.body);
 
   try {
-    console.log("first");
+    // console.log("first");
 
     let chat = await Chat.findOne({
       where: {

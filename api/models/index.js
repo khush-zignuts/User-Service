@@ -7,6 +7,7 @@ const Message = require("./Message");
 const User = require("./User");
 const Notification = require("./Notification");
 const Organizer = require("./Organizer");
+const SocketIO = require("./SocketIO");
 
 // ================= ASSOCIATIONS =====================
 
@@ -18,6 +19,7 @@ const Organizer = require("./Organizer");
 // Message.sync({ force: true, alter: true });
 // User.sync({ force: true, alter: true });
 // Notification.sync({ force: true, alter: true });
+// SocketIO.sync({ force: true, alter: true });
 
 //organizer and Chat associations
 Organizer.hasMany(Chat, { foreignKey: "organizerId", onDelete: "CASCADE" });
@@ -76,4 +78,5 @@ module.exports = {
   EmailQueue,
   EventFeedback,
   Notification,
+  SocketIO,
 };

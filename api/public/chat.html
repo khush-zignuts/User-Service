@@ -117,6 +117,12 @@
             eventId: "283589a3-ec80-4176-947a-fb17168b537b",
         };
 
+        // const token = localStorage.getItem("token");
+        // if (!token) {
+        //     alert("Please log in first.");
+        //     window.location.href = "/login.html";
+        // }
+
         let organizerId;
         let organizerName;
         let userName;
@@ -143,7 +149,7 @@
             console.log('organizerName: ', organizerName);
 
             // Organizer frontend (e.g., admin panel)
-            socket.emit("organizerRegistered", { organizerId });
+            // socket.emit("organizerRegistered", { organizerId });
 
             document.getElementById("chatWith").textContent = `Chat with ${organizerName}`;
 
@@ -159,7 +165,13 @@
                     user1Id: userId,
                     user2Id: organizerId,
                     eventId: eventId,
-                });
+                },
+                    //  {
+                    //     headers: {
+                    //         Authorization: `Bearer ${token}`,
+                    //     },
+                    // }
+                );
 
                 console.log('data:', data);
 
@@ -216,20 +228,29 @@
 
 
                 try {
-                    const response = await fetch("http://localhost:5000/api/user/message/saveMessage", {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(messagePayload)
-                    });
 
-                    const data = await response.json();
+                    const response = await axios.post("http://localhost:5000/api/user/message/saveMessage",
+                        messagePayload
+                    );
+                    // const response = await fetch("http://localhost:5000/api/user/message/saveMessage", {
+                    //     method: 'POST',
+                    //     // headers: {
+                    //     //     'Content-Type': 'application/json',
+                    //     //     Authorization: `Bearer ${token}`,
+                    //     // },
+
+                    //     body: JSON.stringify(messagePayload)
+                    // });
+
+
+                    console.log('response: ', response);
+                    const data = response.data;
                     console.log('data: ', data);
 
-                    if (!response.ok) {
+                    if (response.status !== 200 && response.status !== 201) {
                         console.error("API error:", data.message || data.error);
                     }
+                    console.log("user")
                 } catch (error) {
                     console.error("Failed to send message to server:", error);
                 }
