@@ -4,6 +4,7 @@ const authRoutes = require("./auth/authRoutes");
 const eventRoutes = require("./event/eventRoutes");
 const bookEventRoutes = require("./booking/bookEventroutes");
 const chatRoutes = require("./chat/chatRoutes");
+const messageRoutes = require("./message/messageRoutes");
 
 //authentication
 
@@ -16,6 +17,9 @@ router.use("/event", eventRoutes);
 router.use("/book", bookEventRoutes);
 
 //chat Routes
-// router.use("/chat", chatRoutes);
+router.use("/chat", chatRoutes);
+
+//message Routes
+router.use("/message", messageRoutes);
 
 module.exports = router;

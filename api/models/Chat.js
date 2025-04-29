@@ -23,7 +23,7 @@ const Chat = sequelize.define(
     organizerId: {
       type: DataTypes.UUID,
       allowNull: false,
-      field: "organizer_id", //  event organizer
+      field: "organizer_id", //  event organiser
       references: {
         model: "organizer",
         key: "id",
@@ -39,7 +39,6 @@ const Chat = sequelize.define(
         key: "id",
       },
     },
-   
     ...CommonFields,
   },
   {

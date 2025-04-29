@@ -1,9 +1,9 @@
 const socketIo = require("socket.io");
+const { Event, User, Organizer } = require("../api/models/index");
 
 let io;
 let users = {};
 const socketSetup = (server) => {
-  // Initialize socket.io with the server
   io = socketIo(server, {
     cors: {
       origin: "*",
@@ -11,50 +11,67 @@ const socketSetup = (server) => {
     },
   });
 
-  // Set up the connection event
   io.on("connection", (socket) => {
     console.log("A user connected:", socket.id);
 
-    // registration
-    socket.on("register", (user) => {
-      console.log(`${user.name} has connected with socket ID ${socket.id}`);
-
-      const userId = user.id;
-
-      // Store the mapping: userName -> socket.id
-      users[userId] = socket.id;
-
-      // Send confirmation back to the frontend
-      socket.emit("registered", {
-        message: `${user.name} has connected with socket ID ${socket.id}`,
-      });
-      // Here you can store user data in a more persistent storage if needed
+    socket.on("organizerRegistered", (data) => {
+      const { organizerId } = data;
+      users[organizerId] = socket.id;
+      console.log("Organizer registered:", users);
     });
 
-    // Handle incoming message event
-    socket.on("sendMessage", (data) => {
-      const { chatId, senderId, receiverId, message } = data;
-      console.log("data: ", data);
+    // registration event
+    socket.on("registered", async (data) => {
+      const { userId, eventId } = data;
 
+      const user = await User.findOne({
+        where: { id: userId },
+        attributes: ["id", "name", "email"],
+      });
+
+      const userName = user.name;
+
+      // Fetch the event and organizerId
+      const event = await Event.findOne({
+        where: { id: eventId },
+        attributes: ["id", "organizerId"],
+      });
+
+      const organizerId = event.organizerId;
+
+      const organizer = await Organizer.findOne({
+        where: { id: organizerId },
+        attributes: ["id", "name", "email"],
+      });
+
+      const organizerName = organizer.name;
+
+      // Store user and organizer socket mappings
+      users[userId] = socket.id;
+
+      console.log("users: ", users);
+
+      socket.emit("registered", {
+        organizerId: organizerId,
+        organizerName: organizerName,
+        userName: userName,
+        message: `${user.name} has connected with socket ID ${socket.id}`,
+      });
+    });
+
+    // Handle sending messages
+    socket.on("sendMessage", (data) => {
+      const { chatId, senderId, receiverId, eventId, message } = data;
+      console.log("data: ", data);
       const messagePayload = {
         chatId,
         senderId,
         receiverId,
+        eventId,
         message,
-        // timestamp: new Date().toISOString(),
       };
 
-      // users[receiverId] = socket.id;
-      // Emit the message to the specific receiver
-      // if (users[receiverId]) {
-      //   io.to(users[receiverId]).emit("message", {
-      //     chatId: chatId,
-      //     sender: senderId,
-      //     receiverId: receiverId,
-      //     message: message,
-      //   });
-      // }
-
+      // Emit message to the sender and receiver
       if (users[receiverId]) {
         io.to(users[receiverId]).emit("message", messagePayload);
       }
@@ -67,13 +84,13 @@ const socketSetup = (server) => {
     // Handle disconnection
     socket.on("disconnect", () => {
       console.log("A user disconnected:", socket.id);
-      // Clean up user from user list on disconnect
-      // for (const userId in users) {
-      //   if (users[userId] === socket.id) {
-      //     delete users[userId];
-      //     break;
-      //   }
-      // }
+      // You can remove userId/organizerId mappings here if needed
+      for (const userId in users) {
+        if (users[userId] === socket.id) {
+          delete users[userId];
+          break;
+        }
+      }
     });
   });
 };
