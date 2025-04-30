@@ -28,7 +28,7 @@ const EventFeedback = sequelize.define(
       },
     },
     rating: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.FLOAT,
       allowNull: false,
     },
 

@@ -1,4 +1,5 @@
 const { HTTP_STATUS_CODES } = require("../../../config/constant");
+const { VALIDATION_RULES} = require("../../../config/validationRules")
 const { Sequelize } = require("sequelize");
 const VALIDATOR = require("validatorjs");
 const sequelize = require("../../../config/db");
@@ -166,10 +167,11 @@ module.exports = {
   submitEventFeedback: async (req, res) => {
     try {
       const { eventId, rating, comment } = req.body;
+      console.log('req.body: ', req.body);
       const userId = req.user.id;
 
       const validation = new VALIDATOR(req.body, {
-        eventId: VALIDATION_RULES.EVENT_FEEDBACK.EVENT_ID,
+        // eventId: VALIDATION_RULES.EVENT_FEEDBACK.EVENT_ID,
         rating: VALIDATION_RULES.EVENT_FEEDBACK.RATING,
         comment: VALIDATION_RULES.EVENT_FEEDBACK.COMMENT,
       });

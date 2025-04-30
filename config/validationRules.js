@@ -70,7 +70,7 @@ module.exports = {
     EVENT_FEEDBACK: {
       EVENT_ID: "required|string|uuid",
       USER_ID: "required|string|uuid",
-      RATING: "required|integer|min:1|max:5",
+      RATING: "required|float|min:1|max:5",
       COMMENT: "string",
     },
 

@@ -26,7 +26,7 @@ const socketSetup = (server) => {
         const existingEntry = await SocketIO.findOne({
           where: { senderId: userId },
         });
-        // console.log("existingEntry: ", existingEntry);
+        console.log("existingEntry: ", existingEntry);
 
         if (!existingEntry) {
           // First time: create new socket entry
@@ -76,7 +76,7 @@ const socketSetup = (server) => {
           message: `${user.name} has connected with socket ID ${socket.id}`,
         });
       } catch (err) {
-        console.error("Error handling socket entry:", err);
+        console.error("Error handling socket entry:", err.message);
       }
     });
 
