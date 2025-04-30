@@ -33,23 +33,23 @@ module.exports = {
       LOCATION: "required|string|min:2|max:100",
       DATE: "required|date",
       CAPACITY: "required|integer|min:1|max:10000",
-      ORGANIZER_ID: "required|string|uuid",
+      ORGANIZER_ID: "required|string",
       CATEGORY: "required|string|min:3|max:50",
       START_TIME: "required|time|validFormat", // Custom validation for HH:MM:SS
       END_TIME: "required|time|validFormat|afterStartTime", // Custom validation to ensure endTime is after startTime
     },
 
     BOOKING: {
-      USER_ID: "required|string|uuid",
-      ORGANIZER_ID: "required|string|uuid",
-      EVENT_ID: "required|string|uuid",
+      USER_ID: "required|string",
+      ORGANIZER_ID: "required|string",
+      EVENT_ID: "required|string",
       STATUS: "string|in:pending,booked,cancelled",
     },
 
     CHAT: {
-      USER_ID: "required|string|uuid",
-      ORGANIZER_ID: "required|string|uuid",
-      EVENT_ID: "required|string|uuid",
+      USER_ID: "required|string",
+      ORGANIZER_ID: "required|string",
+      EVENT_ID: "required|string",
       LAST_MESSAGE: "string",
     },
 
@@ -61,30 +61,30 @@ module.exports = {
     },
 
     EVENT_REMINDER: {
-      EVENT_ID: "required|string|uuid",
-      USER_ID: "required|string|uuid",
+      EVENT_ID: "required|string",
+      USER_ID: "required|string",
       IS_SENT: "boolean",
       SENT_AT: "date",
     },
 
     EVENT_FEEDBACK: {
-      EVENT_ID: "required|string|uuid",
-      USER_ID: "required|string|uuid",
-      RATING: "required|float|min:1|max:5",
+      EVENT_ID: "required|string",
+      USER_ID: "required|string",
+      RATING: "required|numeric|min:1|max:5",
       COMMENT: "string",
     },
 
     MESSAGE: {
-      CHAT_ID: "required|string|uuid",
-      SENDER_ID: "required|string|uuid",
-      RECEIVER_ID: "required|string|uuid",
+      CHAT_ID: "required|string",
+      SENDER_ID: "required|string",
+      RECEIVER_ID: "required|string",
       CONTENT: "required|string|min:1",
-      EVENT_ID: "required|string|uuid",
+      EVENT_ID: "required|string",
       DELIVERED_AT: "date",
     },
 
     NOTIFICATION: {
-      USER_ID: "required|string|uuid",
+      USER_ID: "required|string",
       TITLE: "required|string|min:1|max:100",
       MESSAGE: "required|string|min:1",
       TYPE: "string|in:event,announcement,reminder",

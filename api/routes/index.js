@@ -1,25 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const authRoutes = require("./auth/authRoutes");
-const eventRoutes = require("./event/eventRoutes");
-const bookEventRoutes = require("./booking/bookEventroutes");
-const chatRoutes = require("./chat/chatRoutes");
-const messageRoutes = require("./message/messageRoutes");
+const organizerRoutes = require("./organizer/index");
+const userRoutes = require("./user/index");
 
-//authentication
-
-router.use("/auth", authRoutes);
-
-//event
-router.use("/event", eventRoutes);
-
-//booking
-router.use("/book", bookEventRoutes);
-
-//chat Routes
-router.use("/chat", chatRoutes);
-
-//message Routes
-router.use("/message", messageRoutes);
+//admin Routes
+router.use("/user", userRoutes);
+//organizer
+router.use("/organizer", organizerRoutes);
 
 module.exports = router;

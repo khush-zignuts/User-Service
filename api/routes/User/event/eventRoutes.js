@@ -1,6 +1,6 @@
 const express = require("express");
-const { eventController } = require("../../controllers/index");
-const checkUser = require("../../middleware/checkUser");
+const { eventController } = require("../../../controllers/user/index");
+const checkUser = require("../../../middleware/checkUser");
 const router = express.Router();
 
 //event fetch

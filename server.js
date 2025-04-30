@@ -10,7 +10,8 @@ const bodyParser = require("body-parser");
 const cors = require("cors"); // <-- Import cors
 const sequelize = require("./config/db");
 
-const userRoutes = require("./api/routes/index");
+const userRoutes = require("./api/routes/User/index");
+const organizerRoues = require("./api/routes/organizer/index");
 
 //middleware
 app.use(express.urlencoded({ extended: true }));
@@ -27,11 +28,16 @@ app.use(
 );
 //127.0.0.1:5500/api/public/chat.html
 //Routes
-http: app.use("/api/user", userRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/organizer", organizerRoues);
 
-//for internal html :
+// Static files
 app.use(express.static(path.join(__dirname, "api", "public")));
 
+// Root route
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "api", "public", "login.html"));
+});
 // at last port call :
 const PORT = process.env.PORT;
 
@@ -40,6 +46,7 @@ server.listen(PORT, async () => {
   try {
     socketSetup(server);
     // await sequelize.sync({ alter: true }); // or { force: true } to drop & recreate tables (CAUTION)
+    // await sequelize.sync({ force: true });
     console.log(`Server is running on port ${PORT}`);
   } catch (error) {
     console.log(error.message);

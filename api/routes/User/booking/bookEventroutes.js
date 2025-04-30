@@ -1,7 +1,8 @@
 const express = require("express");
-const { bookEventController } = require("../../controllers/index");
 
-const checkUser = require("../../middleware/checkUser");
+const { bookEventController } = require("../../../controllers/user/index");
+
+const checkUser = require("../../../middleware/checkUser");
 const router = express.Router();
 
 //booking create

@@ -1,9 +1,9 @@
-const generateUUID = require("../../utils/generateUUID");
-const sequelize = require("../../../config/db");
+const generateUUID = require("../../../utils/generateUUID");
+const sequelize = require("../../../../config/db");
 const { Sequelize } = require("sequelize");
 const { Op } = require("sequelize");
-const { HTTP_STATUS_CODES } = require("../../../config/constant");
-const { Booking, Event } = require("../../models/index");
+const { HTTP_STATUS_CODES } = require("../../../../config/constant");
+const { Booking, Event } = require("../../../models/index");
 
 module.exports = {
   bookEvent: async (req, res) => {

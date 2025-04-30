@@ -113,15 +113,15 @@
 
         // data to be sent when registering
         const data = {
-            userId: "683c262e-b7fa-46b0-8471-1981714e3c15",
-            eventId: "283589a3-ec80-4176-947a-fb17168b537b",
+            userId: "cc734ebe-59cf-4a02-affd-abe5e4cd08ee",
+            eventId: "255e6f41-74bf-4fd8-8150-e082386367ef",
         };
 
-        // const token = localStorage.getItem("token");
-        // if (!token) {
-        //     alert("Please log in first.");
-        //     window.location.href = "/login.html";
-        // }
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("Please log in first.");
+            window.location.href = "/login.html";
+        }
 
         let organizerId;
         let organizerName;
@@ -133,7 +133,7 @@
 
         // Send registration data once connected
         socket.on("connect", () => {
-            socket.emit("registered", data);
+            socket.emit("registeredUser", data);
         });
 
         // Listen for registration confirmation
@@ -148,6 +148,7 @@
                 console.log('organizerId: ', organizerId);
             console.log('organizerName: ', organizerName);
 
+            console.log(userName);
             // Organizer frontend (e.g., admin panel)
             // socket.emit("organizerRegistered", { organizerId });
 
@@ -159,19 +160,22 @@
 
         async function openChatBox() {
             try {
-                console.log("first")
+                console.log("fopenChatBoxirst")
                 console.log('organizerId: ', organizerId);
-                const data = await axios.post("http://localhost:5000/api/user/chat/getOrCreateChatId", {
-                    user1Id: userId,
-                    user2Id: organizerId,
-                    eventId: eventId,
-                },
-                    //  {
-                    //     headers: {
-                    //         Authorization: `Bearer ${token}`,
-                    //     },
-                    // }
+                const data = await axios.post(
+                    "http://localhost:5000/api/user/chat/getOrCreateChatId",
+                    {
+                        user1Id: userId,
+                        user2Id: organizerId,
+                        eventId: eventId,
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
                 );
+
 
                 console.log('data:', data);
 
@@ -195,16 +199,25 @@
         }
 
         socket.on("message", (data) => {
+            console.log("data received")
             console.log('data: ', data);
-            const chatBox = document.getElementById("chatBox");
 
-            if (data.senderId === userId && data.receiverId === organizerId
-                || data.senderId === organizerId && data.receiverId === userId
-            ) {
-                const messageDiv = document.createElement("div");
-                messageDiv.textContent = `${data.senderId === userId ? "you" : `${organizerId}`}: ${data.message}`;
-                chatBox.appendChild(messageDiv);
+            // const chatBox = document.getElementById("chatBox");
+            // const messageDiv = document.createElement("div");
+            // messageDiv.textContent = ` ${data.message}`;
+            // chatBox.appendChild(messageDiv);
+
+            const chatBox = document.getElementById("chatBox");
+            const messageDiv = document.createElement("div");
+            if (data.senderId === userId) {
+                // User is the sender
+                messageDiv.textContent = `you: ${data.message}`;
+            } else {
+                // Organizer is the sender
+                messageDiv.textContent = `${organizerName}: ${data.message}`;
             }
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
         });
 
 
@@ -223,15 +236,28 @@
                     eventId: eventId,
                     message: message
                 };
+                // socket.emit('sendMessage', messagePayload);
 
-                socket.emit('sendMessage', messagePayload);
+                //send msg api
+                //msg create 
+                // msgpayload 
+                //socketID -REC
+                //emit message 
+                //emi
 
 
                 try {
 
-                    const response = await axios.post("http://localhost:5000/api/user/message/saveMessage",
-                        messagePayload
+                    const response = await axios.post(
+                        "http://localhost:5000/api/user/message/sendMessage",
+                        messagePayload,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        }
                     );
+
                     // const response = await fetch("http://localhost:5000/api/user/message/saveMessage", {
                     //     method: 'POST',
                     //     // headers: {
@@ -243,6 +269,7 @@
                     // });
 
 
+                    console.log("data send");
                     console.log('response: ', response);
                     const data = response.data;
                     console.log('data: ', data);
@@ -250,7 +277,6 @@
                     if (response.status !== 200 && response.status !== 201) {
                         console.error("API error:", data.message || data.error);
                     }
-                    console.log("user")
                 } catch (error) {
                     console.error("Failed to send message to server:", error);
                 }

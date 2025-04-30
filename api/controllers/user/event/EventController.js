@@ -1,9 +1,9 @@
-const { HTTP_STATUS_CODES } = require("../../../config/constant");
-const { VALIDATION_RULES} = require("../../../config/validationRules")
+const { HTTP_STATUS_CODES } = require("../../../../config/constant");
+const { VALIDATION_RULES } = require("../../../../config/validationRules");
 const { Sequelize } = require("sequelize");
 const VALIDATOR = require("validatorjs");
-const sequelize = require("../../../config/db");
-const { Booking, Event, EventFeedback } = require("../../models/index");
+const sequelize = require("../../../../config/db");
+const { Booking, Event, EventFeedback } = require("../../../models/index");
 
 // Get all events or search by title/category
 
@@ -167,11 +167,10 @@ module.exports = {
   submitEventFeedback: async (req, res) => {
     try {
       const { eventId, rating, comment } = req.body;
-      console.log('req.body: ', req.body);
       const userId = req.user.id;
 
       const validation = new VALIDATOR(req.body, {
-        // eventId: VALIDATION_RULES.EVENT_FEEDBACK.EVENT_ID,
+        eventId: VALIDATION_RULES.EVENT_FEEDBACK.EVENT_ID,
         rating: VALIDATION_RULES.EVENT_FEEDBACK.RATING,
         comment: VALIDATION_RULES.EVENT_FEEDBACK.COMMENT,
       });
@@ -187,7 +186,7 @@ module.exports = {
 
       const event = await Event.findOne({
         where: { id: eventId, isDeleted: false },
-        attributes: ["id", "date"],
+        attributes: ["id", "date", "startTime"],
       });
 
       if (!event) {
@@ -199,17 +198,29 @@ module.exports = {
         });
       }
 
-      const eventDate = new Date(event.date);
-      const [hours, minutes] = event.time.split(":").map(Number);
+      // Check for valid event.time
+      if (!event.startTime || !event.startTime.includes(":")) {
+        return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+          success: HTTP_STATUS_CODES.BAD_REQUEST,
+          message: "Event time is missing or invalid.",
+          data: "",
+          error: "",
+        });
+      }
 
-      // Combine date and time
+      const eventDate = new Date(parseInt(event.date, 10)); // Make sure to parse as an integer if it's stored as a string
+      console.log("event.date: ", event.date);
+      console.log("eventDate: ", eventDate);
+
+      // Combining event date and time from startTime
+      const [hours, minutes] = event.startTime.split(":").map(Number);
       eventDate.setHours(hours);
       eventDate.setMinutes(minutes);
       eventDate.setSeconds(0);
       eventDate.setMilliseconds(0);
 
+      // Now you can compare
       const now = new Date();
-
       if (now < eventDate) {
         return res.status(HTTP_STATUS_CODES.FORBIDDEN).json({
           success: HTTP_STATUS_CODES.FORBIDDEN,
@@ -220,7 +231,7 @@ module.exports = {
       }
 
       const booking = await Booking.findOne({
-        where: { userId, eventId, status: "booked" },
+        where: { userId: userId, eventId: eventId, status: "booked" },
         attributes: ["id"],
       });
 
@@ -233,7 +244,6 @@ module.exports = {
         });
       }
 
-      // 4. Check if feedback already exists
       const existingFeedback = await EventFeedback.findOne({
         where: { userId, eventId },
         attributes: ["id"],
@@ -248,7 +258,6 @@ module.exports = {
         });
       }
 
-      // 5. Create feedback
       const feedback = await EventFeedback.create({
         eventId,
         userId,
@@ -256,10 +265,16 @@ module.exports = {
         comment,
       });
 
+      const feedBack = {
+        eventId,
+        userId,
+        rating,
+        comment,
+      };
       return res.status(HTTP_STATUS_CODES.CREATED).json({
         success: HTTP_STATUS_CODES.CREATED,
         message: "Feedback submitted successfully.",
-        data: feedback,
+        data: feedBack,
         error: "",
       });
     } catch (error) {

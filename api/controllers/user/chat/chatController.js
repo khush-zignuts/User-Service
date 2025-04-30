@@ -1,11 +1,11 @@
 const { Op } = require("sequelize");
-const { Chat } = require("../../models/index");
-const { HTTP_STATUS_CODES } = require("../../../config/constant");
+const { Chat } = require("../../../models/index");
+const { HTTP_STATUS_CODES } = require("../../../../config/constant");
 
 // POST /api/chats/get-or-create
 const getorcreate = async (req, res) => {
   const { user1Id, user2Id, eventId } = req.body;
-  console.log("req.body: ", req.body);
+  // console.log("req.body: ", req.body);
 
   try {
     // console.log("first");
@@ -27,7 +27,7 @@ const getorcreate = async (req, res) => {
         createdBy: user1Id,
       });
 
-      console.log("chat: ", chat);
+      // console.log("chat: ", chat);
       console.log("Chat created successfully.");
       return res.status(HTTP_STATUS_CODES.CREATED).json({
         status: HTTP_STATUS_CODES.CREATED,

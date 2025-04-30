@@ -1,16 +1,19 @@
 const otpGenerator = require("otp-generator");
 const VALIDATOR = require("validatorjs");
-const generateUUID = require("../../utils/generateUUID");
-const hashPw = require("../../utils/hashpw");
-const comparePassword = require("../../utils/comparePassword");
+const generateUUID = require("../../../utils/generateUUID");
+const hashPw = require("../../../utils/hashpw");
+const comparePassword = require("../../../utils/comparePassword");
 
 const jwt = require("jsonwebtoken");
-const verifyOTP = require("../../utils/verifyOtp");
-const { HTTP_STATUS_CODES, TOKEN_EXPIRY } = require("../../../config/constant");
-const { VALIDATION_RULES } = require("../../../config/validationRules");
+const verifyOTP = require("../../../utils/verifyOtp");
+const {
+  HTTP_STATUS_CODES,
+  TOKEN_EXPIRY,
+} = require("../../../../config/constant");
+const { VALIDATION_RULES } = require("../../../../config/validationRules");
 
-const { User } = require("../../models/index");
-const sendEmail = require("../../helper/sendEmail");
+const { User } = require("../../../models/index");
+const sendEmail = require("../../../helper/sendEmail");
 
 module.exports = {
   signup: async (req, res) => {
@@ -86,7 +89,7 @@ module.exports = {
       await sendEmail(
         email,
         "Verify Your Email - OTP",
-        "../../assets/templates/otp-verification-email.handlebars",
+        "../../assets/templates/otp-verification-email.hbs",
         templateData
       );
 

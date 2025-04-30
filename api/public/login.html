@@ -44,6 +44,7 @@
         <button type="submit">Log In</button>
         <div id="message" class="error"></div>
     </form>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <script>
         const form = document.getElementById("loginForm");
@@ -58,15 +59,14 @@
             const payload = Object.fromEntries(formData);
 
             try {
-                const res = await fetch("http://localhost:5000/api/auth/user/login", {
-                    method: "POST",
+                console.log('payload: ', payload);
+                const res = await axios.post("http://localhost:5000/api/user/auth/login", payload, {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify(payload),
                 });
 
-                const data = await res.json();
+                const data = res.data;
 
                 if (data.status === 200 && data.data?.token) {
                     const token = data.data.token;
@@ -83,6 +83,7 @@
                 console.error("Login error:", err);
                 messageDiv.textContent = "Something went wrong. Please try again.";
             }
+
         });
     </script>
 </body>
