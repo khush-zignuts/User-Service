@@ -144,7 +144,10 @@
             userName = data.userName,
                 organizerName = data.organizerName;
             organizerId = data.organizerId,
+                // Organizer frontend (e.g., admin panel)
+                // socket.emit("organizerRegistered", { organizerId });
 
+<<<<<<< HEAD
                 console.log('organizerId: ', organizerId);
             console.log('organizerName: ', organizerName);
 
@@ -153,6 +156,9 @@
             // socket.emit("organizerRegistered", { organizerId });
 
             document.getElementById("chatWith").textContent = `Chat with ${organizerName}`;
+=======
+                document.getElementById("chatWith").textContent = `Chat with ${organizerName}`;
+>>>>>>> 6264777 (chnages)
 
             openChatBox();
         });
@@ -160,8 +166,11 @@
 
         async function openChatBox() {
             try {
+<<<<<<< HEAD
                 console.log("fopenChatBoxirst")
                 console.log('organizerId: ', organizerId);
+=======
+>>>>>>> 6264777 (chnages)
                 const data = await axios.post(
                     "http://localhost:5000/api/user/chat/getOrCreateChatId",
                     {
@@ -200,7 +209,10 @@
 
         socket.on("message", (data) => {
             console.log("data received")
+<<<<<<< HEAD
             console.log('data: ', data);
+=======
+>>>>>>> 6264777 (chnages)
 
             // const chatBox = document.getElementById("chatBox");
             // const messageDiv = document.createElement("div");
@@ -249,7 +261,11 @@
                 try {
 
                     const response = await axios.post(
+<<<<<<< HEAD
                         "http://localhost:5000/api/user/message/sendMessage",
+=======
+                        "http://localhost:5000/api/user/message/send",
+>>>>>>> 6264777 (chnages)
                         messagePayload,
                         {
                             headers: {
@@ -270,8 +286,12 @@
 
 
                     console.log("data send");
+<<<<<<< HEAD
                     console.log('response: ', response);
                     const data = response.data;
+=======
+               const data = response.data;
+>>>>>>> 6264777 (chnages)
                     console.log('data: ', data);
 
                     if (response.status !== 200 && response.status !== 201) {

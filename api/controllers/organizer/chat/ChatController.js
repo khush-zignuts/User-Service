@@ -15,6 +15,10 @@ const getorcreate = async (req, res) => {
         organizerId: user1Id,
         eventId: eventId,
       },
+<<<<<<< HEAD
+=======
+      attributes: ["id"],
+>>>>>>> 6264777 (chnages)
     });
 
     // console.log('chat: ', chat);

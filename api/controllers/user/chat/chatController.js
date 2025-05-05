@@ -5,20 +5,21 @@ const { HTTP_STATUS_CODES } = require("../../../../config/constant");
 // POST /api/chats/get-or-create
 const getorcreate = async (req, res) => {
   const { user1Id, user2Id, eventId } = req.body;
+<<<<<<< HEAD
   // console.log("req.body: ", req.body);
+=======
+>>>>>>> 6264777 (chnages)
 
   try {
-    // console.log("first");
-
     let chat = await Chat.findOne({
       where: {
         userId: user1Id,
         organizerId: user2Id,
         eventId: eventId,
       },
+      attributes: ["id"],
     });
 
-    // console.log('chat: ', chat);
     if (!chat) {
       chat = await Chat.create({
         userId: user1Id,
@@ -27,7 +28,10 @@ const getorcreate = async (req, res) => {
         createdBy: user1Id,
       });
 
+<<<<<<< HEAD
       // console.log("chat: ", chat);
+=======
+>>>>>>> 6264777 (chnages)
       console.log("Chat created successfully.");
       return res.status(HTTP_STATUS_CODES.CREATED).json({
         status: HTTP_STATUS_CODES.CREATED,

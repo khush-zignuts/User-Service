@@ -1,4 +1,12 @@
+<<<<<<< HEAD
 const { HTTP_STATUS_CODES } = require("../../../../config/constant");
+=======
+const {
+  HTTP_STATUS_CODES,
+  BOOKING_STATUS,
+  PAGINATION,
+} = require("../../../../config/constant");
+>>>>>>> 6264777 (chnages)
 const { VALIDATION_RULES } = require("../../../../config/validationRules");
 const { Sequelize } = require("sequelize");
 const VALIDATOR = require("validatorjs");
@@ -13,8 +21,8 @@ module.exports = {
       const title = req.query.title || null;
       const category = req.query.category || null;
 
-      const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 10;
+      const page = parseInt(req.query.page) || PAGINATION.DEFAULT_PAGE;
+      const limit = parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT;
       const offset = (page - 1) * limit;
       const replacements = { limit, offset };
 
@@ -231,7 +239,15 @@ module.exports = {
       }
 
       const booking = await Booking.findOne({
+<<<<<<< HEAD
         where: { userId: userId, eventId: eventId, status: "booked" },
+=======
+        where: {
+          userId: userId,
+          eventId: eventId,
+          status: BOOKING_STATUS.BOOKED,
+        },
+>>>>>>> 6264777 (chnages)
         attributes: ["id"],
       });
 

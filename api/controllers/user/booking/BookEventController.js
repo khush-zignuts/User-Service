@@ -1,8 +1,20 @@
+<<<<<<< HEAD
 const generateUUID = require("../../../utils/generateUUID");
 const sequelize = require("../../../../config/db");
 const { Sequelize } = require("sequelize");
 const { Op } = require("sequelize");
 const { HTTP_STATUS_CODES } = require("../../../../config/constant");
+=======
+const { generateUUID } = require("../../../utils/utils");
+const sequelize = require("../../../../config/db");
+const { Sequelize } = require("sequelize");
+const { Op } = require("sequelize");
+const {
+  HTTP_STATUS_CODES,
+  BOOKING_STATUS,
+  PAGINATION,
+} = require("../../../../config/constant");
+>>>>>>> 6264777 (chnages)
 const { Booking, Event } = require("../../../models/index");
 
 module.exports = {
@@ -10,14 +22,12 @@ module.exports = {
     try {
       const userId = req.user.id;
       const eventId = req.query.eventId;
-      console.log("eventId: ", eventId);
 
       // Fetch event to get organizerId
       const event = await Event.findOne({
         where: { id: eventId, isDeleted: false },
-        attributes: ["id", "organizerId"],
+        attributes: ["id", "organizerId", "capacity"],
       });
-      console.log("event: ", event);
 
       if (!event) {
         return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({
@@ -25,6 +35,24 @@ module.exports = {
           message: "Event not found.",
           data: "",
           error: "EVENT_NOT_FOUND",
+        });
+      }
+
+      // Check if the event is already fully booked
+      const bookedCount = await Booking.count({
+        where: {
+          eventId: eventId,
+          status: BOOKING_STATUS.BOOKED,
+          isDeleted: false,
+        },
+      });
+
+      if (bookedCount >= event.capacity) {
+        return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+          status: HTTP_STATUS_CODES.BAD_REQUEST,
+          message: "This event is fully booked.",
+          data: "",
+          error: "EVENT_FULL",
         });
       }
 
@@ -37,17 +65,15 @@ module.exports = {
         attributes: ["id"],
       });
 
-      console.log("existingBooking: ", existingBooking);
-
       if (existingBooking) {
-        if (existingBooking.status === "booked") {
+        if (existingBooking.status === BOOKING_STATUS.BOOKED) {
           return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
             status: HTTP_STATUS_CODES.BAD_REQUEST,
             message: "You have already booked this event.",
             data: "",
             error: "DUPLICATE_BOOKING",
           });
-        } else if (existingBooking.status === "cancelled") {
+        } else if (existingBooking.status === BOOKING_STATUS.CANCELLED) {
           return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
             status: HTTP_STATUS_CODES.BAD_REQUEST,
             message:
@@ -55,7 +81,7 @@ module.exports = {
             data: "",
             error: "BOOKING_CANCELLED",
           });
-        } else if (existingBooking.status === "pending") {
+        } else if (existingBooking.status === BOOKING_STATUS.PENDING) {
           return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
             status: HTTP_STATUS_CODES.BAD_REQUEST,
             message: "Your booking for this event is still pending.",
@@ -65,17 +91,15 @@ module.exports = {
         }
       }
       const bokkindId = generateUUID();
-      console.log("bokkindId: ", bokkindId);
 
       let newBooking = {
         id: bokkindId,
         userId: userId,
         eventId: eventId,
         organizerId: event.organizerId,
-        status: "pending",
+        status: BOOKING_STATUS.PENDING,
       };
 
-      console.log("newBooking: ", newBooking);
       // Create booking
       await Booking.create(newBooking);
 
@@ -99,9 +123,9 @@ module.exports = {
     try {
       const eventId = req.query.eventId;
       const userId = req.user.id;
-      console.log("userId: ", userId);
-      const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 10;
+
+      const page = parseInt(req.query.page) || PAGINATION.DEFAULT_PAGE;
+      const limit = parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT;
       const offset = (page - 1) * limit;
       let replacements = {};
 
@@ -115,8 +139,6 @@ module.exports = {
         whereClause += ` AND e.id = :eventId `;
         replacements.eventId = eventId;
       }
-
-      console.log("before raw query");
 
       const rawQuery = `
         SELECT DISTINCT 
@@ -136,7 +158,6 @@ module.exports = {
         ${paginationClause};
 `;
 
-      console.log("after raw query");
       const events = await sequelize.query(rawQuery, {
         replacements,
         type: Sequelize.QueryTypes.SELECT,

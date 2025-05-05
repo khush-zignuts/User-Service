@@ -1,7 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../../config/db");
 const { CommonFields, commonOptions } = require("./CommanFields");
-const { messaging } = require("firebase-admin");
 const Message = sequelize.define(
   "Message",
   {

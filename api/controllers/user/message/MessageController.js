@@ -1,5 +1,12 @@
 const { Message, SocketIO } = require("../../../models/index");
+<<<<<<< HEAD
 const { HTTP_STATUS_CODES } = require("../../../../config/constant");
+=======
+const {
+  HTTP_STATUS_CODES,
+  PAGINATION,
+} = require("../../../../config/constant");
+>>>>>>> 6264777 (chnages)
 const { Op } = require("sequelize");
 const { getIo } = require("../../../../config/socketIo");
 
@@ -37,10 +44,13 @@ const sendMessage = async (req, res) => {
         attributes: ["socketId"],
       }),
     ]);
+<<<<<<< HEAD
     // console.log("[senderSocket, receiverSocket]: ", [
     //   senderSocket,
     //   receiverSocket,
     // ]);
+=======
+>>>>>>> 6264777 (chnages)
 
     const messagePayload = {
       chatId,
@@ -119,11 +129,18 @@ const sendMessage = async (req, res) => {
 const getMessages = async (req, res) => {
   try {
     const chatId = req.params.chatId;
+<<<<<<< HEAD
     console.log("chatId: ", chatId);
     const senderId = req.user.id;
     console.log("senderId: ", senderId);
 
     const limit = parseInt(req.query.limit) || 20;
+=======
+
+    const senderId = req.user.id;
+
+    const limit = parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT;
+>>>>>>> 6264777 (chnages)
     const before = req.query.before ? new Date(req.query.before) : new Date();
 
     const messages = await Message.findAll({
@@ -152,6 +169,7 @@ const getMessages = async (req, res) => {
   }
 };
 
+<<<<<<< HEAD
 // const getMessagesByChatId = async (req, res) => {
 //   try {
 //     const { chatId } = req.params;
@@ -234,4 +252,9 @@ module.exports = {
 
   getMessages,
   // deleteMessage,
+=======
+module.exports = {
+  sendMessage,
+  getMessages,
+>>>>>>> 6264777 (chnages)
 };

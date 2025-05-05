@@ -6,7 +6,11 @@ const { HTTP_STATUS_CODES } = require("../../../../config/constant");
 const sendMessage = async (req, res) => {
   try {
     const io = getIo();
+<<<<<<< HEAD
     console.log("io: ", io);
+=======
+
+>>>>>>> 6264777 (chnages)
     const { chatId, senderId, receiverId, message, eventId } = req.body;
 
     if (!chatId || !senderId || !receiverId || !message || !eventId) {
@@ -80,6 +84,7 @@ const sendMessage = async (req, res) => {
   }
 };
 
+<<<<<<< HEAD
 // const saveMessage = async (req, res) => {
 //   try {
 //     // console.log("req.body: ", req.body);
@@ -121,6 +126,14 @@ const getMessages = async (req, res) => {
     console.log("chatId: ", chatId);
     const senderId = req.user.id;
     console.log("senderId: ", senderId);
+=======
+const getMessages = async (req, res) => {
+  try {
+    const chatId = req.params.chatId;
+    
+    const senderId = req.user.id;
+   
+>>>>>>> 6264777 (chnages)
 
     const limit = parseInt(req.query.limit) || 20;
     const before = req.query.before ? new Date(req.query.before) : new Date();

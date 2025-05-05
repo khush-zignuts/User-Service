@@ -1,11 +1,22 @@
 const otpGenerator = require("otp-generator");
 const VALIDATOR = require("validatorjs");
+<<<<<<< HEAD
 const generateUUID = require("../../../utils/generateUUID");
 const hashPw = require("../../../utils/hashpw");
 const comparePassword = require("../../../utils/comparePassword");
 
 const jwt = require("jsonwebtoken");
 const verifyOTP = require("../../../utils/verifyOtp");
+=======
+const {
+  comparePassword,
+  generateUUID,
+  verifyOTP,
+  hashPw,
+} = require("../../../utils/utils");
+
+const jwt = require("jsonwebtoken");
+>>>>>>> 6264777 (chnages)
 const {
   HTTP_STATUS_CODES,
   TOKEN_EXPIRY,
@@ -13,13 +24,16 @@ const {
 const { VALIDATION_RULES } = require("../../../../config/validationRules");
 
 const { User } = require("../../../models/index");
+<<<<<<< HEAD
 const sendEmail = require("../../../helper/sendEmail");
+=======
+const sendEmail = require("../../../helper/Mail/sendEmail");
+>>>>>>> 6264777 (chnages)
 
 module.exports = {
   signup: async (req, res) => {
     try {
       const { email, password, name, phoneNumber } = req.body;
-      console.log("req.body: ", req.body);
 
       const validation = new VALIDATOR(req.body, {
         email: VALIDATION_RULES.USER.EMAIL,
@@ -85,7 +99,6 @@ module.exports = {
         year: new Date().getFullYear(),
       };
 
-      console.log("templateData: ", templateData);
       await sendEmail(
         email,
         "Verify Your Email - OTP",
@@ -251,14 +264,7 @@ module.exports = {
           error: "",
         });
       }
-      if (!user.accessToken) {
-        return res.json({
-          status: HTTP_STATUS_CODES.BAD_REQUEST,
-          message: "Already logged out",
-          data: "",
-          error: "",
-        });
-      }
+     
       // Set accessToken to NULL (logout)
       await User.update(
         {

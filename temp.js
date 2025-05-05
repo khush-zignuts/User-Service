@@ -1,61 +1,94 @@
-const socketIo = require("socket.io");
-const { Event, User, Organizer } = require("../api/models/index");
-
-let io;
-let users = {};
-const socketSetup = (server) => {
-  io = socketIo(server, {
-    cors: {
-      origin: "*",
-      methods: ["GET", "POST"],
+module.exports = {
+  //? Validation Rules
+  VALIDATION_RULES: {
+    ADMIN: {
+      NAME: "required|string|min:1|max:30",
+      EMAIL: "required|email",
+      PASSWORD:
+        "required|min:8|max:16|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,16}$/",
+      ACCESS_TOKEN: "string",
     },
-  });
+    USER: {
+      NAME: "required|string|min:1|max:30",
+      EMAIL: "required|email",
+      PASSWORD:
+        "required|min:8|max:16|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,16}$/",
+      PHONE_NUMBER: "string|min:10|regex:/^[0-9]{10,}$/",
+      ACCESS_TOKEN: "string",
+      OTP: "string|min:4|max:6",
+    },
 
-  io.on("connection", (socket) => {
-    console.log("A user connected:", socket.id);
-    // console.log("socket: ", socket)
-    // registration event
-    socket.on("registered", async (data) => {
-      const { userId, eventId } = data;
+    ORGANIZER: {
+      NAME: "required|string|min:1|max:30",
+      EMAIL: "required|email",
+      PASSWORD:
+        "required|min:8|max:16|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,16}$/",
+      PHONE_NUMBER: "string|min:10|regex:/^[0-9]{10,}$/",
+      ACCESS_TOKEN: "string",
+      OTP: "string|min:4|max:6",
+    },
 
-     
-    });
+    EVENT: {
+      TITLE: "required|string|min:3|max:100",
+      DESCRIPTION: "required|string|min:10",
+      LOCATION: "required|string|min:2|max:100",
+      DATE: "required|date",
+      CAPACITY: "required|integer|min:1|max:10000",
+      ORGANIZER_ID: "required|string",
+      CATEGORY: "required|string|min:3|max:50",
+      START_TIME: "required|time|validFormat", // Custom validation for HH:MM:SS
+      END_TIME: "required|time|validFormat|afterStartTime", // Custom validation to ensure endTime is after startTime
+    },
 
-    // Handle sending messages
-    socket.on("sendMessage", (data) => {
-      const { chatId, senderId, receiverId, eventId, message } = data;
-      console.log("data: ", data);
-      const messagePayload = {
-        chatId,
-        senderId,
-        receiverId,
-        eventId,
-        message,
-      };
+    BOOKING: {
+      USER_ID: "required|string",
+      ORGANISZER_ID: "required|string",
+      EVENT_ID: "required|string",
+      STATUS: "string|in:pending,booked,cancelled",
+    },
 
-      // Emit message to the sender and receiver
-      if (users[receiverId]) {
-        console.log("users[receiverId]: ", users[receiverId]);
-        io.to(users[receiverId]).emit("message", messagePayload);
-      }
+    CHAT: {
+      USER_ID: "required|string",
+      ORGANIZER_ID: "required|string",
+      EVENT_ID: "required|string",
+      LAST_MESSAGE: "string",
+    },
 
-      if (users[senderId]) {
-        io.to(users[senderId]).emit("message", messagePayload);
-      }
-    });
+    EMAIL_QUEUE: {
+      TO: "required|email",
+      SUBJECT: "required|string|min:1|max:100",
+      BODY: "required|string|min:1",
+      IS_SENT: "boolean",
+    },
 
-    // Handle disconnection
-    socket.on("disconnect", () => {
-      console.log("A user disconnected:", socket.id);
-      // You can remove userId/organizerId mappings here if needed
-      for (const userId in users) {
-        if (users[userId] === socket.id) {
-          delete users[userId];
-          break;
-        }
-      }
-    });
-  });
+    EVENT_REMINDER: {
+      EVENT_ID: "required|string",
+      USER_ID: "required|string",
+      IS_SENT: "boolean",
+      SENT_AT: "date",
+    },
+
+    EVENT_FEEDBACK: {
+      EVENT_ID: "required|string",
+      USER_ID: "required|string",
+      RATING: "required|numeric|min:1|max:5",
+      COMMENT: "string",
+    },
+
+    MESSAGE: {
+      CHAT_ID: "required|string",
+      SENDER_ID: "required|string",
+      RECEIVER_ID: "required|string",
+      CONTENT: "required|string|min:1",
+      EVENT_ID: "required|string",
+      DELIVERED_AT: "date",
+    },
+
+    NOTIFICATION: {
+      USER_ID: "required|string",
+      TITLE: "required|string|min:1|max:100",
+      MESSAGE: "required|string|min:1",
+      TYPE: "string|in:event,announcement,reminder",
+    },
+  },
 };
-
-module.exports = { socketSetup };

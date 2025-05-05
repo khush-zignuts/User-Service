@@ -1,18 +1,18 @@
+require("dotenv").config();
+
 module.exports = {
   //? Validation Rules
   VALIDATION_RULES: {
     ADMIN: {
       NAME: "required|string|min:1|max:30",
       EMAIL: "required|email",
-      PASSWORD:
-        "required|min:8|max:16|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,16}$/",
+      PASSWORD: process.env.VALIDATE_PASSWORD,
       ACCESS_TOKEN: "string",
     },
     USER: {
       NAME: "required|string|min:1|max:30",
       EMAIL: "required|email",
-      PASSWORD:
-        "required|min:8|max:16|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,16}$/",
+      PASSWORD: process.env.VALIDATE_PASSWORD,
       PHONE_NUMBER: "string|min:10|regex:/^[0-9]{10,}$/",
       ACCESS_TOKEN: "string",
       OTP: "string|min:4|max:6",
@@ -21,8 +21,7 @@ module.exports = {
     ORGANIZER: {
       NAME: "required|string|min:1|max:30",
       EMAIL: "required|email",
-      PASSWORD:
-        "required|min:8|max:16|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,16}$/",
+      PASSWORD: process.env.VALIDATE_PASSWORD,
       PHONE_NUMBER: "string|min:10|regex:/^[0-9]{10,}$/",
       ACCESS_TOKEN: "string",
       OTP: "string|min:4|max:6",
