@@ -1,12 +1,8 @@
 const { Message, SocketIO } = require("../../../models/index");
-<<<<<<< HEAD
-const { HTTP_STATUS_CODES } = require("../../../../config/constant");
-=======
 const {
   HTTP_STATUS_CODES,
   PAGINATION,
 } = require("../../../../config/constant");
->>>>>>> 6264777 (chnages)
 const { Op } = require("sequelize");
 const { getIo } = require("../../../../config/socketIo");
 
@@ -44,13 +40,6 @@ const sendMessage = async (req, res) => {
         attributes: ["socketId"],
       }),
     ]);
-<<<<<<< HEAD
-    // console.log("[senderSocket, receiverSocket]: ", [
-    //   senderSocket,
-    //   receiverSocket,
-    // ]);
-=======
->>>>>>> 6264777 (chnages)
 
     const messagePayload = {
       chatId,
@@ -93,54 +82,13 @@ const sendMessage = async (req, res) => {
   }
 };
 
-// const saveMessage = async (req, res) => {
-//   try {
-//     const { chatId, senderId, receiverId, message, eventId } = req.body;
-//     // console.log("req.body: ", req.body);
-
-//     // Save message to DB
-//     const savedMessage = await Message.create({
-//       chatId,
-//       senderId,
-//       receiverId,
-//       content: message,
-//       eventId: eventId,
-//       deliveredAt: Math.floor(Date.now() / 1000) * 1000,
-//     });
-
-//     console.log("Message sent successfully.");
-//     return res.status(HTTP_STATUS_CODES.CREATED).json({
-//       status: HTTP_STATUS_CODES.CREATED,
-//       message: "Message sent successfully.",
-//       data: savedMessage,
-//       error: "",
-//     });
-//   } catch (error) {
-//     console.error("Error saving message:", error);
-//     return res.status(HTTP_STATUS_CODES.SERVER_ERROR).json({
-//       status: HTTP_STATUS_CODES.SERVER_ERROR,
-//       message: "Failed to send message.",
-//       data: "",
-//       error: error.message || "Internal server error",
-//     });
-//   }
-// };
-
 const getMessages = async (req, res) => {
   try {
     const chatId = req.params.chatId;
-<<<<<<< HEAD
-    console.log("chatId: ", chatId);
-    const senderId = req.user.id;
-    console.log("senderId: ", senderId);
-
-    const limit = parseInt(req.query.limit) || 20;
-=======
 
     const senderId = req.user.id;
 
     const limit = parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT;
->>>>>>> 6264777 (chnages)
     const before = req.query.before ? new Date(req.query.before) : new Date();
 
     const messages = await Message.findAll({
@@ -169,92 +117,7 @@ const getMessages = async (req, res) => {
   }
 };
 
-<<<<<<< HEAD
-// const getMessagesByChatId = async (req, res) => {
-//   try {
-//     const { chatId } = req.params;
-
-//     const messages = await Message.findAll({
-//       where: { chatId },
-//       order: [["createdAt", "ASC"]], // oldest to newest
-//     });
-
-//     return res.status(200).json({
-//       status: 200,
-//       message: "Messages fetched successfully.",
-//       data: messages,
-//     });
-//   } catch (error) {
-//     console.error("Error fetching messages:", error);
-//     return res.status(500).json({
-//       status: 500,
-//       message: "Failed to fetch messages.",
-//       error: error.message,
-//     });
-//   }
-// };
-
-// const deleteMessage = async (req, res) => {
-//   try {
-//     const { messageId } = req.params;
-//     const { userId, deleteForEveryone } = req.body;
-
-//     const message = await Message.findByPk(messageId);
-
-//     if (!message) {
-//       return res.status(404).json({
-//         status: false,
-//         message: "Message not found",
-//         error: "MESSAGE_NOT_FOUND",
-//       });
-//     }
-
-//     if (deleteForEveryone) {
-//       // Only sender can delete for everyone
-//       if (message.senderId !== userId) {
-//         return res.status(403).json({
-//           status: false,
-//           message: "Unauthorized",
-//           error: "ONLY_SENDER_CAN_DELETE_FOR_EVERYONE",
-//         });
-//       }
-
-//       message.isDeletedForEveryone = true;
-//       await message.save();
-
-//       return res.status(200).json({
-//         status: true,
-//         message: "Message deleted for everyone",
-//       });
-//     } else {
-//       if (!message.deletedFor.includes(userId)) {
-//         message.deletedFor.push(userId);
-//         await message.save();
-//       }
-
-//       return res.status(200).json({
-//         status: true,
-//         message: "Message deleted for you",
-//       });
-//     }
-//   } catch (error) {
-//     console.error("deleteMessage error:", error);
-//     return res.status(500).json({
-//       status: false,
-//       message: "Server error",
-//       error: error.message,
-//     });
-//   }
-// };
-
-module.exports = {
-  sendMessage,
-
-  getMessages,
-  // deleteMessage,
-=======
 module.exports = {
   sendMessage,
   getMessages,
->>>>>>> 6264777 (chnages)
 };

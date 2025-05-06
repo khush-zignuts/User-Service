@@ -1,10 +1,6 @@
 const express = require("express");
 
-<<<<<<< HEAD
-const { bookEventController } = require("../../../controllers/user/index");
-=======
 const bookEventController = require("../../../controllers/user/booking/BookEventController");
->>>>>>> 6264777 (chnages)
 
 const checkUser = require("../../../middleware/checkUser");
 const router = express.Router();

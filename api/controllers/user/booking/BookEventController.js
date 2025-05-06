@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-const generateUUID = require("../../../utils/generateUUID");
-const sequelize = require("../../../../config/db");
-const { Sequelize } = require("sequelize");
-const { Op } = require("sequelize");
-const { HTTP_STATUS_CODES } = require("../../../../config/constant");
-=======
 const { generateUUID } = require("../../../utils/utils");
 const sequelize = require("../../../../config/db");
 const { Sequelize } = require("sequelize");
@@ -14,7 +7,6 @@ const {
   BOOKING_STATUS,
   PAGINATION,
 } = require("../../../../config/constant");
->>>>>>> 6264777 (chnages)
 const { Booking, Event } = require("../../../models/index");
 
 module.exports = {

@@ -1,13 +1,4 @@
-const otpGenerator = require("otp-generator");
 const VALIDATOR = require("validatorjs");
-<<<<<<< HEAD
-const generateUUID = require("../../../utils/generateUUID");
-const hashPw = require("../../../utils/hashpw");
-const comparePassword = require("../../../utils/comparePassword");
-
-const jwt = require("jsonwebtoken");
-const verifyOTP = require("../../../utils/verifyOtp");
-=======
 const {
   comparePassword,
   generateUUID,
@@ -16,7 +7,6 @@ const {
 } = require("../../../utils/utils");
 
 const jwt = require("jsonwebtoken");
->>>>>>> 6264777 (chnages)
 const {
   HTTP_STATUS_CODES,
   TOKEN_EXPIRY,
@@ -24,11 +14,9 @@ const {
 const { VALIDATION_RULES } = require("../../../../config/validationRules");
 
 const { User } = require("../../../models/index");
-<<<<<<< HEAD
-const sendEmail = require("../../../helper/sendEmail");
-=======
 const sendEmail = require("../../../helper/Mail/sendEmail");
->>>>>>> 6264777 (chnages)
+
+const bcrypt = require("bcrypt");
 
 module.exports = {
   signup: async (req, res) => {
@@ -68,10 +56,7 @@ module.exports = {
 
       const hashedPassword = await hashPw(password);
 
-      const otp = otpGenerator.generate(6, {
-        upperCase: false,
-        specialChars: false,
-      });
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
       const otpCreated = Math.floor(Date.now() / 1000);
       const uuid = generateUUID();
@@ -264,7 +249,7 @@ module.exports = {
           error: "",
         });
       }
-     
+
       // Set accessToken to NULL (logout)
       await User.update(
         {
@@ -286,6 +271,74 @@ module.exports = {
         message: "serverError",
         data: "",
         error: error.message,
+      });
+    }
+  },
+
+  changePassword: async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { currentPassword, newPassword } = req.body;
+
+      const validation = new VALIDATOR(req.body, {
+        currentPassword: VALIDATION_RULES.USER.PASSWORD,
+        newPassword: VALIDATION_RULES.USER.PASSWORD,
+      });
+
+      if (validation.fails()) {
+        return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+          status: HTTP_STATUS_CODES.BAD_REQUEST,
+          message: "Validation failed.",
+          data: "",
+          error: validation.errors.all(),
+        });
+      }
+
+      const user = await User.findOne({
+        where: { id: userId, isDeleted: false },
+        attributes: ["id", "password"],
+      });
+
+      if (!user) {
+        return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({
+          status: HTTP_STATUS_CODES.NOT_FOUND,
+          message: "user not found.",
+          data: "",
+          error: "USER_NOT_FOUND",
+        });
+      }
+
+      const isMatch = await bcrypt.compare(currentPassword, admin.password);
+
+      if (!isMatch) {
+        return res.status(HTTP_STATUS_CODES.UNAUTHORIZED).json({
+          status: HTTP_STATUS_CODES.UNAUTHORIZED,
+          message: "Current password is incorrect.",
+          data: "",
+          error: "INVALID_CURRENT_PASSWORD",
+        });
+      }
+
+      const hashedNewPassword = await hashPw(newPassword);
+
+      await User.update(
+        { password: hashedNewPassword },
+        { where: { id: user.id } }
+      );
+
+      return res.status(HTTP_STATUS_CODES.OK).json({
+        status: HTTP_STATUS_CODES.OK,
+        message: "Password updated successfully.",
+        data: "",
+        error: "",
+      });
+    } catch (error) {
+      console.error("Change Password Error:", error.message);
+      return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+        status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
+        message: "Server error.",
+        data: "",
+        error: "INTERNAL_SERVER_ERROR",
       });
     }
   },

@@ -6,11 +6,6 @@ const { HTTP_STATUS_CODES } = require("../../../../config/constant");
 const sendMessage = async (req, res) => {
   try {
     const io = getIo();
-<<<<<<< HEAD
-    console.log("io: ", io);
-=======
-
->>>>>>> 6264777 (chnages)
     const { chatId, senderId, receiverId, message, eventId } = req.body;
 
     if (!chatId || !senderId || !receiverId || !message || !eventId) {
@@ -84,56 +79,12 @@ const sendMessage = async (req, res) => {
   }
 };
 
-<<<<<<< HEAD
-// const saveMessage = async (req, res) => {
-//   try {
-//     // console.log("req.body: ", req.body);
-//     const { chatId, senderId, receiverId, message, eventId } = req.body;
-
-//     console.log("User Enter in save message : ");
-
-//     // Save message to DB
-//     const savedMessage = await Message.create({
-//       chatId,
-//       senderId,
-//       receiverId,
-//       content: message,
-//       eventId: eventId,
-//       deliveredAt: Math.floor(Date.now() / 1000) * 1000,
-//     });
-
-//     console.log("Message sent successfully.");
-//     return res.status(HTTP_STATUS_CODES.CREATED).json({
-//       status: HTTP_STATUS_CODES.CREATED,
-//       message: "Message sent successfully.",
-//       data: savedMessage,
-//       error: "",
-//     });
-//   } catch (error) {
-//     console.error("Error saving message:", error);
-//     return res.status(HTTP_STATUS_CODES.SERVER_ERROR).json({
-//       status: HTTP_STATUS_CODES.SERVER_ERROR,
-//       message: "Failed to send message.",
-//       data: "",
-//       error: error.message || "Internal server error",
-//     });
-//   }
-// };
-
-const getMessages = async (req, res) => {
-  try {
-    const chatId = req.params.chatId;
-    console.log("chatId: ", chatId);
-    const senderId = req.user.id;
-    console.log("senderId: ", senderId);
-=======
 const getMessages = async (req, res) => {
   try {
     const chatId = req.params.chatId;
     
     const senderId = req.user.id;
    
->>>>>>> 6264777 (chnages)
 
     const limit = parseInt(req.query.limit) || 20;
     const before = req.query.before ? new Date(req.query.before) : new Date();
