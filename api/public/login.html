@@ -59,10 +59,6 @@
             const payload = Object.fromEntries(formData);
 
             try {
-<<<<<<< HEAD
-                console.log('payload: ', payload);
-=======
->>>>>>> 6264777 (chnages)
                 const res = await axios.post("http://localhost:5000/api/user/auth/login", payload, {
                     headers: {
                         "Content-Type": "application/json",

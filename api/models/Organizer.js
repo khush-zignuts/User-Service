@@ -42,6 +42,16 @@ const Organizer = sequelize.define(
       allowNull: true,
       field: "otp_created_at",
     },
+    forgetPasswordToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: "forgot_password_token",
+    },
+    forgetPasswordTokenExpiry: {
+      type: DataTypes.BIGINT, // store Unix timestamp (in seconds)
+      field: "forgot_password_token_expiry",
+      allowNull: true,
+    },
     ...CommonFields,
   },
   {

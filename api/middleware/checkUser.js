@@ -50,11 +50,6 @@ const checkUser = async (req, res, next) => {
         error: "",
       });
     }
-<<<<<<< HEAD
-    console.log("user found");
-
-=======
->>>>>>> 6264777 (chnages)
     req.user = user;
 
     next();

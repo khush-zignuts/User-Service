@@ -52,10 +52,6 @@ const checkOrganizer = async (req, res, next) => {
       });
     }
 
-<<<<<<< HEAD
-    console.log("organizer found");
-=======
->>>>>>> 6264777 (chnages)
     // Set organizer on request object
     req.organizer = organizer;
 

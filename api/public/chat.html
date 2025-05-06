@@ -144,21 +144,8 @@
             userName = data.userName,
                 organizerName = data.organizerName;
             organizerId = data.organizerId,
-                // Organizer frontend (e.g., admin panel)
-                // socket.emit("organizerRegistered", { organizerId });
 
-<<<<<<< HEAD
-                console.log('organizerId: ', organizerId);
-            console.log('organizerName: ', organizerName);
-
-            console.log(userName);
-            // Organizer frontend (e.g., admin panel)
-            // socket.emit("organizerRegistered", { organizerId });
-
-            document.getElementById("chatWith").textContent = `Chat with ${organizerName}`;
-=======
                 document.getElementById("chatWith").textContent = `Chat with ${organizerName}`;
->>>>>>> 6264777 (chnages)
 
             openChatBox();
         });
@@ -166,11 +153,6 @@
 
         async function openChatBox() {
             try {
-<<<<<<< HEAD
-                console.log("fopenChatBoxirst")
-                console.log('organizerId: ', organizerId);
-=======
->>>>>>> 6264777 (chnages)
                 const data = await axios.post(
                     "http://localhost:5000/api/user/chat/getOrCreateChatId",
                     {
@@ -209,15 +191,6 @@
 
         socket.on("message", (data) => {
             console.log("data received")
-<<<<<<< HEAD
-            console.log('data: ', data);
-=======
->>>>>>> 6264777 (chnages)
-
-            // const chatBox = document.getElementById("chatBox");
-            // const messageDiv = document.createElement("div");
-            // messageDiv.textContent = ` ${data.message}`;
-            // chatBox.appendChild(messageDiv);
 
             const chatBox = document.getElementById("chatBox");
             const messageDiv = document.createElement("div");
@@ -248,24 +221,11 @@
                     eventId: eventId,
                     message: message
                 };
-                // socket.emit('sendMessage', messagePayload);
-
-                //send msg api
-                //msg create 
-                // msgpayload 
-                //socketID -REC
-                //emit message 
-                //emi
-
 
                 try {
 
                     const response = await axios.post(
-<<<<<<< HEAD
-                        "http://localhost:5000/api/user/message/sendMessage",
-=======
                         "http://localhost:5000/api/user/message/send",
->>>>>>> 6264777 (chnages)
                         messagePayload,
                         {
                             headers: {
@@ -274,24 +234,9 @@
                         }
                     );
 
-                    // const response = await fetch("http://localhost:5000/api/user/message/saveMessage", {
-                    //     method: 'POST',
-                    //     // headers: {
-                    //     //     'Content-Type': 'application/json',
-                    //     //     Authorization: `Bearer ${token}`,
-                    //     // },
-
-                    //     body: JSON.stringify(messagePayload)
-                    // });
-
 
                     console.log("data send");
-<<<<<<< HEAD
-                    console.log('response: ', response);
                     const data = response.data;
-=======
-               const data = response.data;
->>>>>>> 6264777 (chnages)
                     console.log('data: ', data);
 
                     if (response.status !== 200 && response.status !== 201) {
@@ -300,184 +245,11 @@
                 } catch (error) {
                     console.error("Failed to send message to server:", error);
                 }
-
-                // Optionally, display the message in the chat box immediately
-                // const messageDiv = document.createElement('div');
-                // messageDiv.textContent = `you: ${message}`;
-                // chatBox.appendChild(messageDiv);
-
                 // Clear the input field
                 messageInput.value = '';
             }
         }
 
-
-        // async function fetchLoginUser() {
-        //     try {
-        //         const res = await axios.get("http://localhost:5000/api/action/getLoginUser", {
-        //             headers: {
-        //                 "Content-Type": "application/json",
-        //                 Authorization: `Bearer ${token}`
-        //             }
-        //         });
-
-        //         const user = res.data.data;
-        //         const userId = user.id;
-        //         const userName = user.name;
-
-        //         if (user.status && user?.name) {
-        //             loggedInUserId = userId;
-        //             loggedInUserName = userName;
-        //             socket.emit("register", user);
-        //             document.getElementById("loggedInUser").textContent = user.name;
-        //         }
-        //         console.log('loggedInUserName: ', loggedInUserName);
-        //         console.log('loggedInUserId: ', loggedInUserId);
-        //     } catch (err) {
-        //         console.error("Error fetching logged-in user:", err.message);
-        //         document.getElementById("loggedInUser").textContent = "Error fetching user";
-        //     }
-        // }
-
-        // window.onload = function () {
-        //     fetchLoginUser();
-        //     fetchorganizer();
-        // };
-
-
-        // //left bottom khush login name:
-        // async function fetchLoginUser() {
-        //     try {
-        //         const res = await axios.get("http://localhost:5000/api/action/getLoginUser", {
-        //             headers: {
-        //                 "Content-Type": "application/json",
-        //                 Authorization: `Bearer ${token}`
-        //             }
-        //         });
-
-        //         const user = res.data.data;
-        //         const userId = user.id;
-        //         const userName = user.name;
-
-        //         if (user.status && user?.name) {
-        //             loggedInUserId = userId;
-        //             loggedInUserName = userName;
-        //             socket.emit("register", user);
-        //             document.getElementById("loggedInUser").textContent = user.name;
-        //         }
-        //         console.log('loggedInUserName: ', loggedInUserName);
-        //         console.log('loggedInUserId: ', loggedInUserId);
-        //     } catch (err) {
-        //         console.error("Error fetching logged-in user:", err.message);
-        //         document.getElementById("loggedInUser").textContent = "Error fetching user";
-        //     }
-        // }
-
-        // function handleLogout() {
-        //     window.location.href = "/logout.html";
-        // }
-
-        // //left side all contact names - except khush
-        // // Fetch users list
-        // async function fetchUsers() {
-        //     try {
-        //         const res = await axios.get("http://localhost:5000/api/action/getUser", {
-
-        //             headers: {
-        //                 "Content-Type": "application/json",
-        //                 Authorization: `Bearer ${token}`
-        //             },
-        //         });
-        //         const data = res.data;
-
-        //         if (data.status && data.data) {
-        //             const userList = document.getElementById("userList");
-        //             userList.innerHTML = "";
-
-        //             data.data.forEach(user => {
-        //                 const li = document.createElement("li");
-
-        //                 li.textContent = user.name;
-
-        //                 // Add click event listener to open chat box
-        //                 li.addEventListener('click', () => openChatBox(user));
-
-        //                 userList.appendChild(li);
-        //             });
-        //         }
-        //     } catch (err) {
-        //         console.error("Error fetching users:", err);
-        //     }
-        // }
-
-        // //right side main box
-
-        // //   open the chat box for a specific user on the right side
-
-        // let currentReceiverId = null;
-        // let currentReceiverName = null;
-        // let currentSenderChatId = null;
-        // let currentReceiverChatId = null;
-        // let chatId = null;
-
-        // let earliestMessageTime = null;
-
-        // async function loadMessages(currentSenderChatId, beforeTime = null) {
-        //     try {
-        //         const params = {
-        //             limit: 20,
-        //         };
-
-        //         // if (beforeTime) {
-        //         //     params.before = beforeTime;
-        //         // }
-
-        //         const response = await axios.get(`http://localhost:5000/api/message/get/${currentSenderChatId}`, {
-        //             headers: {
-        //                 'Authorization': `Bearer ${token}`
-        //             },
-        //             params: params
-        //         });
-
-        //         const result = response.data;
-        //         console.log('result: ', result);
-
-        //         if (result.status && result.data.length) {
-        //             const messages = result.data;
-        //             const chatBox = document.getElementById("chatBox");
-
-        //             const previousScrollHeight = chatBox.scrollHeight;
-
-        //             messages.forEach((msg) => {
-        //                 const div = document.createElement("div");
-        //                 div.textContent = `${msg.senderId === loggedInUserId ? "you" : currentReceiverName}: ${msg.content}`;
-        //                 chatBox.prepend(div);
-        //             });
-
-        //             earliestMessageTime = messages[0].createdAt;
-
-        //             // maintain scroll position after prepending
-        //             chatBox.scrollTop = chatBox.scrollHeight - previousScrollHeight;
-        //         }
-
-        //     } catch (err) {
-        //         console.error("Error loading messages:", err);
-        //     }
-        // }
-
-
-        // window.onload = function () {
-        //     fetchLoginUser();
-        //     fetchUsers();
-        // };
-
-        // document.getElementById("chatBox").addEventListener("scroll", () => {
-        //     const chatBox = document.getElementById("chatBox");
-
-        //     if (chatBox.scrollTop === 0 && earliestMessageTime && currentSenderChatId) {
-        //         loadMessages(currentSenderChatId, earliestMessageTime);
-        //     }
-        // });
 
 
     </script>

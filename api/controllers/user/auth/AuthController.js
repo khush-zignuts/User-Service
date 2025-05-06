@@ -16,6 +16,7 @@ const { VALIDATION_RULES } = require("../../../../config/validationRules");
 const { User } = require("../../../models/index");
 const sendEmail = require("../../../helper/Mail/sendEmail");
 
+const { Op } = require("sequelize");
 const bcrypt = require("bcrypt");
 
 module.exports = {
@@ -275,6 +276,7 @@ module.exports = {
     }
   },
 
+  // Change Password
   changePassword: async (req, res) => {
     try {
       const userId = req.user.id;
@@ -307,8 +309,7 @@ module.exports = {
           error: "USER_NOT_FOUND",
         });
       }
-
-      const isMatch = await bcrypt.compare(currentPassword, admin.password);
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
 
       if (!isMatch) {
         return res.status(HTTP_STATUS_CODES.UNAUTHORIZED).json({
@@ -339,6 +340,138 @@ module.exports = {
         message: "Server error.",
         data: "",
         error: "INTERNAL_SERVER_ERROR",
+      });
+    }
+  },
+
+  // Forgot Password
+  forgotPassword: async (req, res) => {
+    try {
+      const { email } = req.body;
+
+      const validation = new VALIDATOR(req.body, {
+        email: VALIDATION_RULES.USER.EMAIL,
+      });
+
+      if (validation.fails()) {
+        return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+          status: HTTP_STATUS_CODES.BAD_REQUEST,
+          message: "Validation failed.",
+          data: "",
+          error: validation.errors.all(),
+        });
+      }
+
+      const user = await User.findOne({
+        where: { email: email, isDeleted: false },
+      });
+
+      if (!user) {
+        return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({
+          status: HTTP_STATUS_CODES.NOT_FOUND,
+          message: "user not found.",
+          data: "",
+          error: "USER_NOT_FOUND",
+        });
+      }
+
+      user.forgetPasswordToken = generateUUID();
+      user.forgetPasswordTokenExpiry = Math.floor(
+        (Date.now() + 15 * 60 * 1000) / 1000
+      );
+      // 15 min expiry
+      await user.save();
+
+      const templateData = {
+        userName: user.name,
+        email: user.email,
+        resetLink: `http://localhost:5000/api/user/auth/reset-password/${user.forgetPasswordToken}`,
+        appName: "Event Management",
+        year: new Date().getFullYear(),
+      };
+
+      await sendEmail(
+        email,
+        "Reset Your Password",
+        "../../../assets/templates/reset-password-email.hbs",
+        templateData
+      );
+
+      console.log("\n Send email with reset link");
+
+      return res.status(HTTP_STATUS_CODES.OK).json({
+        status: HTTP_STATUS_CODES.OK,
+        message: "Password reset link has been sent to your email.",
+        data: { email },
+        error: "",
+      });
+    } catch (err) {
+      return res.status(HTTP_STATUS_CODES.SERVER_ERROR).json({
+        status: HTTP_STATUS_CODES.SERVER_ERROR,
+        message: "Server error",
+        data: "",
+        error: err.message,
+      });
+    }
+  },
+
+  // Reset Password
+  resetPassword: async (req, res) => {
+    try {
+      const { email, token, newPassword } = req.body;
+
+      const validation = new VALIDATOR(req.body, {
+        email: VALIDATION_RULES.USER.EMAIL,
+        newPassword: VALIDATION_RULES.USER.PASSWORD,
+      });
+
+      if (validation.fails()) {
+        return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+          status: HTTP_STATUS_CODES.BAD_REQUEST,
+          message: "Validation failed.",
+          data: "",
+          error: validation.errors.all(),
+        });
+      }
+
+      const user = await User.findOne({
+        where: {
+          email,
+          forgetPasswordToken: token,
+          forgetPasswordTokenExpiry: { [Op.gt]: Math.floor(Date.now() / 1000) },
+          // token is still valid
+        },
+      });
+
+      if (!user) {
+        return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({
+          status: HTTP_STATUS_CODES.NOT_FOUND,
+          message: "user not found.",
+          data: "",
+          error: "USER_NOT_FOUND",
+        });
+      }
+
+      const hashedPassword = await hashPw(newPassword);
+
+      await user.update({
+        password: hashedPassword,
+        forgetPasswordToken: null,
+        forgetPasswordTokenExpiry: null,
+      });
+
+      return res.status(HTTP_STATUS_CODES.OK).json({
+        status: HTTP_STATUS_CODES.OK,
+        message: "Password reset successful.",
+        data: "",
+        error: "",
+      });
+    } catch (err) {
+      return res.status(HTTP_STATUS_CODES.SERVER_ERROR).json({
+        status: HTTP_STATUS_CODES.SERVER_ERROR,
+        message: "Server error",
+        data: "",
+        error: err.message,
       });
     }
   },
