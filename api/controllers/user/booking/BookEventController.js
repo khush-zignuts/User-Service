@@ -13,7 +13,9 @@ module.exports = {
   bookEvent: async (req, res) => {
     try {
       const userId = req.user.id;
-      const eventId = req.query.eventId;
+      console.log("userId: ", userId);
+      const eventId = req.params.id;
+      console.log("eventId: ", eventId);
 
       // Fetch event to get organizerId
       const event = await Event.findOne({
@@ -38,6 +40,7 @@ module.exports = {
           isDeleted: false,
         },
       });
+      console.log("bookedCount: ", bookedCount);
 
       if (bookedCount >= event.capacity) {
         return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
@@ -54,9 +57,10 @@ module.exports = {
           userId: userId,
           eventId: eventId,
         },
-        attributes: ["id"],
+        attributes: ["id", "status"],
       });
 
+      console.log("existingBooking: ", existingBooking);
       if (existingBooking) {
         if (existingBooking.status === BOOKING_STATUS.BOOKED) {
           return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({

@@ -82,42 +82,42 @@ const sendMessage = async (req, res) => {
   }
 };
 
-const getMessages = async (req, res) => {
-  try {
-    const chatId = req.params.chatId;
+// const getMessages = async (req, res) => {
+//   try {
+//     const chatId = req.params.chatId;
 
-    const senderId = req.user.id;
+//     const senderId = req.user.id;
 
-    const limit = parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT;
-    const before = req.query.before ? new Date(req.query.before) : new Date();
+//     const limit = parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT;
+//     const before = req.query.before ? new Date(req.query.before) : new Date();
 
-    const messages = await Message.findAll({
-      where: {
-        chatId,
-        createdAt: { [Op.lt]: before },
-      },
-      order: [["createdAt", "DESC"]],
-      limit,
-    });
+//     const messages = await Message.findAll({
+//       where: {
+//         chatId,
+//         createdAt: { [Op.lt]: before },
+//       },
+//       order: [["createdAt", "DESC"]],
+//       limit,
+//     });
 
-    return res.status(HTTP_STATUS_CODES.OK).json({
-      status: HTTP_STATUS_CODES.OK,
-      message: "Messages fetched successfully.",
-      data: messages,
-      error: "",
-    });
-  } catch (err) {
-    console.error("Error fetching messages:", err);
-    return res.status(HTTP_STATUS_CODES.SERVER_ERROR).json({
-      status: HTTP_STATUS_CODES.SERVER_ERROR,
-      message: "Failed to fetch messages.",
-      data: "",
-      error: err.message || "Internal server error",
-    });
-  }
-};
+//     return res.status(HTTP_STATUS_CODES.OK).json({
+//       status: HTTP_STATUS_CODES.OK,
+//       message: "Messages fetched successfully.",
+//       data: messages,
+//       error: "",
+//     });
+//   } catch (err) {
+//     console.error("Error fetching messages:", err);
+//     return res.status(HTTP_STATUS_CODES.SERVER_ERROR).json({
+//       status: HTTP_STATUS_CODES.SERVER_ERROR,
+//       message: "Failed to fetch messages.",
+//       data: "",
+//       error: err.message || "Internal server error",
+//     });
+//   }
+// };
 
 module.exports = {
   sendMessage,
-  getMessages,
+  // getMessages,
 };

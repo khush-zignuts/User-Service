@@ -7,7 +7,7 @@ const router = express.Router();
 
 //booking create
 router
-  .post("/event", checkUser, bookEventController.bookEvent)
+  .post("/event/:id", checkUser, bookEventController.bookEvent)
   .get(
     "/getAllBookedEventsOrById",
     checkUser,

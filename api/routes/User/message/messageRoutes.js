@@ -8,6 +8,6 @@ const router = express.Router();
 router.post("/send", checkUser, messageController.sendMessage);
 
 // Get all messages between two users
-router.get("get/:chatId", checkUser, messageController.getMessages);
+// router.get("get/:chatId", checkUser, messageController.getMessages);
 
 module.exports = router;

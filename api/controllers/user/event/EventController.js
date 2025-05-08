@@ -14,9 +14,6 @@ const { Booking, Event, EventFeedback } = require("../../../models/index");
 module.exports = {
   getAllEventsBySearch: async (req, res) => {
     try {
-      const title = req.query.title || null;
-      const category = req.query.category || null;
-
       const page = parseInt(req.query.page) || PAGINATION.DEFAULT_PAGE;
       const limit = parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT;
       const offset = (page - 1) * limit;
@@ -24,14 +21,11 @@ module.exports = {
 
       let whereClause = `WHERE e.is_deleted = false`;
 
-      if (title) {
-        whereClause += ` AND e.title ILIKE :title`;
-        replacements.title = `%${title}%`;
-      }
+      const searchQuery = req.query.query || null;
 
-      if (category) {
-        whereClause += ` AND e.category ILIKE :category`;
-        replacements.category = `%${category}%`;
+      if (searchQuery) {
+        whereClause += ` AND (e.title ILIKE :search OR e.category ILIKE :search)`;
+        replacements.search = `%${searchQuery}%`;
       }
 
       let paginationClause = `LIMIT :limit OFFSET :offset`;
@@ -100,9 +94,58 @@ module.exports = {
       });
     }
   },
+  getEventById: async (req, res) => {
+    try {
+      const eventId = req.params.id;
+
+      const userId = req.user.id;
+
+      const event = await Event.findOne({
+        where: {
+          id: eventId,
+          isDeleted: false,
+        },
+        attributes: [
+          "id",
+          "title",
+          "description",
+          "location",
+          "date",
+          "startTime",
+          "endTime",
+          "capacity",
+          "category",
+        ],
+      });
+
+      if (!event) {
+        return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({
+          status: HTTP_STATUS_CODES.NOT_FOUND,
+          message: "Event not found",
+          data: "",
+          error: "No event with the provided ID",
+        });
+      }
+      return res.status(HTTP_STATUS_CODES.OK).json({
+        status: HTTP_STATUS_CODES.OK,
+        message: "Event fetched successfully",
+        data: event,
+        error: "",
+      });
+    } catch (error) {
+      console.error("Fetch Event Error:", error);
+      return res.status(HTTP_STATUS_CODES.SERVER_ERROR).json({
+        status: HTTP_STATUS_CODES.SERVER_ERROR,
+        message: "Failed to fetch event",
+        data: "",
+        error: error.message || "Internal server error",
+      });
+    }
+  },
   getAllNotifications: async (req, res) => {
     try {
       const userId = req.user.id;
+
       const { type } = req.query;
 
       const page = parseInt(req.query.page) || 1;
@@ -171,6 +214,7 @@ module.exports = {
   submitEventFeedback: async (req, res) => {
     try {
       const { eventId, rating, comment } = req.body;
+      console.log("req.body: ", req.body);
       const userId = req.user.id;
 
       const validation = new VALIDATOR(req.body, {

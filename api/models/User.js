@@ -46,6 +46,11 @@ const User = sequelize.define(
       allowNull: true,
       field: "otp_created_at",
     },
+    fcmToken: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      field: "fcm_token",
+    },
     forgetPasswordToken: {
       type: DataTypes.STRING,
       allowNull: true,

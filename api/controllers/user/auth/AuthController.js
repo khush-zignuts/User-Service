@@ -78,19 +78,19 @@ module.exports = {
 
       otpStore[email] = otp;
 
-      const templateData = {
-        userName: name,
-        otp: otp,
-        appName: "Event Management",
-        year: new Date().getFullYear(),
-      };
+      // const templateData = {
+      //   userName: name,
+      //   otp: otp,
+      //   appName: "Event Management",
+      //   year: new Date().getFullYear(),
+      // };
 
-      await sendEmail(
-        email,
-        "Verify Your Email - OTP",
-        "../../assets/templates/otp-verification-email.hbs",
-        templateData
-      );
+      // await sendEmail(
+      //   email,
+      //   "Verify Your Email - OTP",
+      //   "../../assets/templates/otp-verification-email.hbs",
+      //   templateData
+      // );
 
       return res.status(HTTP_STATUS_CODES.OK).json({
         status: HTTP_STATUS_CODES.OK,
@@ -169,7 +169,8 @@ module.exports = {
 
   login: async (req, res) => {
     try {
-      const { email, password } = req.body;
+      const { email, password, fcmToken } = req.body;
+      console.log('req.body: ', req.body);
 
       const validation = new VALIDATOR(req.body, {
         email: VALIDATION_RULES.USER.EMAIL,
@@ -187,7 +188,7 @@ module.exports = {
 
       const user = await User.findOne({
         where: { email, isDeleted: false, isActive: true },
-        attributes: ["id", "email", "password", "accessToken"],
+        attributes: ["id", "name", "email", "password", "accessToken"],
       });
 
       if (!user) {
@@ -215,12 +216,13 @@ module.exports = {
       });
 
       user.accessToken = token;
+      user.fcmToken = fcmToken;
       await user.save();
 
       return res.status(HTTP_STATUS_CODES.OK).json({
         status: HTTP_STATUS_CODES.OK,
         message: "Login successful.",
-        data: { token, userId: user.id },
+        data: { token, userId: user.id, name: user.name },
         error: "",
       });
     } catch (error) {
@@ -385,7 +387,7 @@ module.exports = {
       const templateData = {
         userName: user.name,
         email: user.email,
-        resetLink: `http://localhost:5000/api/user/auth/reset-password/${user.forgetPasswordToken}`,
+        resetLink: `http://localhost:5173/auth/forgot-password/reset-password/${user.forgetPasswordToken}`,
         appName: "Event Management",
         year: new Date().getFullYear(),
       };
@@ -415,14 +417,14 @@ module.exports = {
     }
   },
 
-  // Reset Password
   resetPassword: async (req, res) => {
     try {
-      const { email, token, newPassword } = req.body;
+      const { email, token, newPassword, confirmPassword } = req.body;
 
       const validation = new VALIDATOR(req.body, {
         email: VALIDATION_RULES.USER.EMAIL,
         newPassword: VALIDATION_RULES.USER.PASSWORD,
+        confirmPassword: VALIDATION_RULES.USER.PASSWORD,
       });
 
       if (validation.fails()) {
@@ -434,21 +436,41 @@ module.exports = {
         });
       }
 
+      if (newPassword !== confirmPassword) {
+        return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+          status: HTTP_STATUS_CODES.BAD_REQUEST,
+          message: "Passwords do not match.",
+          data: "",
+          error: "PASSWORD_MISMATCH",
+        });
+      }
+
       const user = await User.findOne({
         where: {
           email,
           forgetPasswordToken: token,
           forgetPasswordTokenExpiry: { [Op.gt]: Math.floor(Date.now() / 1000) },
-          // token is still valid
         },
+        attributes: ["id", "password"],
       });
 
       if (!user) {
         return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({
           status: HTTP_STATUS_CODES.NOT_FOUND,
-          message: "user not found.",
+          message: "Invalid or expired token.",
           data: "",
-          error: "USER_NOT_FOUND",
+          error: "TOKEN_INVALID_OR_EXPIRED",
+        });
+      }
+
+      // Check if new password is the same as the old password
+      const isSamePassword = await bcrypt.compare(newPassword, user.password);
+      if (isSamePassword) {
+        return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+          status: HTTP_STATUS_CODES.BAD_REQUEST,
+          message: "New password must be different from the old password.",
+          data: "",
+          error: "PASSWORD_SAME_AS_OLD",
         });
       }
 
@@ -469,7 +491,7 @@ module.exports = {
     } catch (err) {
       return res.status(HTTP_STATUS_CODES.SERVER_ERROR).json({
         status: HTTP_STATUS_CODES.SERVER_ERROR,
-        message: "Server error",
+        message: "Server error.",
         data: "",
         error: err.message,
       });
